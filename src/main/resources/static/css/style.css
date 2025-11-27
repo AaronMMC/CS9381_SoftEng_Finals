@@ -1,0 +1,14 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.login-card {
+    margin-top: 100px;
+    max-width: 400px;
+    border-radius: 12px;
+}
+
+.login-card .btn-success {
+    background-color: #28a745;
+    border: none;
+}

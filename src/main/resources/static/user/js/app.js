@@ -43,7 +43,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             console.log("Login Success:", user);
 
             // OPTIONAL: Redirect to dashboard after 1 second
-            // setTimeout(() => window.location.href = "dashboard.html", 1000);
+            setTimeout(() => window.location.href = "dashboard.html", 1000);
+            document.getElementById('loginForm').reset();
 
         } else {
             // ERROR: Show Red Message (e.g., "Invalid password")

@@ -1,0 +1,8 @@
+body {
+    background-color: #f8f9fa;
+}
+
+#menuList .card {
+    margin-bottom: 20px;
+    border-radius: 12px;
+}

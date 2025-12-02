@@ -25,6 +25,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private SellerProfile sellerProfile;
 
+    // User Info
+    private String phoneNumber;
+    private String campus;
+
     // --- Getters and Setters ---
 
     public Long getId() { return id; }
@@ -41,4 +45,10 @@ public class User {
 
     public SellerProfile getSellerProfile() { return sellerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
 }

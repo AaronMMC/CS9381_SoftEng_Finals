@@ -19,7 +19,7 @@ public class AuthController {
      */
     @PostMapping("/register/customer")
     public User registerCustomer(@RequestBody AuthRequest request) {
-        return userService.registerCustomer(request.username, request.password);
+        return userService.registerCustomer(request.username, request.password,request.phoneNumber, request.campus);
     }
 
     /**
@@ -32,7 +32,9 @@ public class AuthController {
         return userService.registerSeller(
                 request.username,
                 request.password,
-                request.canteenName
+                request.canteenName,
+                request.phoneNumber,
+                request.campus
         );
     }
 
@@ -53,6 +55,8 @@ public class AuthController {
     public static class AuthRequest {
         public String username;
         public String password;
+        public String phoneNumber;
+        public String campus;
     }
 
     public static class SellerAuthRequest extends AuthRequest {

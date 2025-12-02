@@ -1,67 +1,174 @@
-// CONFIGURATION:
-// If testing alone: use "http://localhost:8080"
-// If testing with a friend: use "http://YOUR_FRIEND_IP:8080"
 const API_BASE_URL = "http://localhost:8080";
 
-document.getElementById('loginForm').addEventListener('submit', async function(event) {
-    // 1. Prevent the form from refreshing the page
-    event.preventDefault();
+// --- UTILITY: Toggle Password Visibility ---
+function togglePassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (input.type === "password") {
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
 
-    // 2. Get data from input boxes
-    const usernameInput = document.getElementById('username').value;
-    const passwordInput = document.getElementById('password').value;
-    const messageArea = document.getElementById('messageArea');
+// --- LOGIC: LOGIN PAGE ---
+const loginForm = document.getElementById('loginForm');
 
-    // Clear previous messages
-    messageArea.textContent = "Connecting...";
-    messageArea.className = "mt-3 text-center text-muted";
+if (loginForm) {
+    loginForm.addEventListener('submit', async function(event) {
+        event.preventDefault(); // Stop page refresh
 
-    // 3. Prepare the JSON payload (Matches AuthRequest in Java)
-    const payload = {
-        username: usernameInput,
-        password: passwordInput
-    };
+        const usernameInput = document.getElementById('username').value;
+        const passwordInput = document.getElementById('password').value;
+        const messageArea = document.getElementById('messageArea');
 
-    try {
-        // 4. Send the POST Request to Spring Boot
-        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        // UI: Show loading state
+        messageArea.textContent = "Verifying...";
+        messageArea.className = "mt-3 text-muted";
 
-        // 5. Handle the Response
-        if (response.ok) {
-            const user = await response.json();
+        // JSON Payload (Matches AuthRequest.java)
+        const payload = {
+            username: usernameInput,
+            password: passwordInput
+        };
 
-            // SUCCESS: Show Green Message
-            messageArea.textContent = `Welcome back, ${user.username}! (Role: ${user.role})`;
-            messageArea.className = "mt-3 text-center text-success";
+        try {
+            // POST /api/auth/login
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-            console.log("Login Success:", user);
+            if (response.ok) {
+                const user = await response.json();
 
-            // OPTIONAL: Redirect to dashboard after 1 second
-            setTimeout(() => window.location.href = "dashboard.html", 1000);
-            document.getElementById('loginForm').reset();
+                // UI: Success
+                messageArea.textContent = `Success! Welcome ${user.username}`;
+                messageArea.className = "mt-3 text-success";
 
+                // Save user info (so other pages know who is logged in)
+                sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+
+                // Redirect logic based on Role
+                setTimeout(() => {
+                    if (user.role === 'SELLER') {
+                        window.location.href = "seller-dashboard.html";
+                    } else if (user.role === 'ADMIN') {
+                        window.location.href = "admin-dashboard.html";
+                    } else {
+                        // Default for CUSTOMER
+                        window.location.href = "dashboard.html";
+                    }
+                }, 1000);
+
+            } else {
+                // UI: Error (Backend threw RuntimeException)
+                // "Login Failed: Invalid password" comes here
+                const errorText = await response.text();
+
+                // Clean up error message if it's too technical
+                let displayError = "Invalid credentials.";
+                if (errorText.includes("Login Failed")) {
+                    // Extract just the message part if possible
+                    displayError = "Login failed. Please check your password.";
+                }
+
+                messageArea.textContent = displayError;
+                messageArea.className = "mt-3 text-danger";
+            }
+        } catch (error) {
+            console.error(error);
+            messageArea.textContent = "Server is offline or not responding.";
+            messageArea.className = "mt-3 text-danger";
+        }
+    });
+}
+
+// --- LOGIC: REGISTER PAGE ---
+const registerForm = document.getElementById('registerForm');
+const sellerToggle = document.getElementById('sellerToggle');
+const canteenField = document.getElementById('canteenField');
+
+// 1. Toggle Canteen Input Visibility (UI Only)
+if (sellerToggle) {
+    sellerToggle.addEventListener('change', function() {
+        if (this.checked) {
+            canteenField.classList.remove('d-none'); // Show input
+            document.getElementById('canteenName').setAttribute('required', 'true');
         } else {
-            // ERROR: Show Red Message (e.g., "Invalid password")
-            const errorMessage = await response.text(); // Backend returns text error
-            // Clean up the error message if it's a JSON object or messy stack trace
-            const cleanError = errorMessage.includes("Login Failed")
-                ? errorMessage
-                : "Invalid credentials or server error.";
+            canteenField.classList.add('d-none'); // Hide input
+            document.getElementById('canteenName').removeAttribute('required');
+        }
+    });
+}
 
-            messageArea.textContent = cleanError;
-            messageArea.className = "mt-3 text-center text-danger";
+// 2. Handle Registration Submit
+if (registerForm) {
+    registerForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('regUsername').value;
+        const password = document.getElementById('regPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+
+        // NEW FIELDS
+        const phone = document.getElementById('phoneNumber').value;
+        const campus = document.getElementById('campusSelect').value;
+
+        const isSeller = document.getElementById('sellerToggle').checked;
+        const canteenName = document.getElementById('canteenName').value;
+        const messageArea = document.getElementById('regMessageArea');
+
+        if (password !== confirmPass) {
+            messageArea.textContent = "Passwords do not match!";
+            messageArea.className = "mt-3 text-danger";
+            return;
         }
 
-    } catch (error) {
-        // NETWORK ERROR (Server is offline or Firewall blocked)
-        console.error("Connection Error:", error);
-        messageArea.textContent = "Cannot connect to server. Is IntelliJ running?";
-        messageArea.className = "mt-3 text-center text-danger";
-    }
-});
+        let endpoint = "/api/auth/register/customer";
+
+        // ADD NEW FIELDS TO PAYLOAD (Base Payload)
+        let payload = {
+            username: username,
+            password: password,
+            phoneNumber: phone,  // Send phone
+            campus: campus       // Send campus
+        };
+
+        if (isSeller) {
+            endpoint = "/api/auth/register/seller";
+
+            // FIX: We must include the phone and campus here as well!
+            // We use the spread operator (...) to keep the existing fields
+            // and simply add the canteenName to it.
+            payload = {
+                ...payload, // Copies username, password, phoneNumber, campus
+                canteenName: canteenName
+            };
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                messageArea.textContent = isSeller
+                    ? "Application Sent! Please wait for Admin approval."
+                    : "Account created! Redirecting...";
+
+                messageArea.className = "mt-3 text-success";
+                setTimeout(() => window.location.href = "index.html", 2000);
+            } else {
+                const error = await response.text();
+                messageArea.textContent = "Registration failed.";
+                messageArea.className = "mt-3 text-danger";
+            }
+        } catch (error) {
+            messageArea.textContent = "Server error.";
+            messageArea.className = "mt-3 text-danger";
+        }
+    });
+}

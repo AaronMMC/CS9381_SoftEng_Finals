@@ -24,11 +24,14 @@ public class UserService {
      * Logic for "User Story 7": User Registration.
      * Customers are active immediately.
      */
-    public User registerCustomer(String username, String password) {
+    public User registerCustomer(String username, String password, String phoneNumber, String campus) {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(password); // In a real app, hash this password!
         newUser.setRole(UserRole.CUSTOMER);
+
+        newUser.setPhoneNumber(phoneNumber);
+        newUser.setCampus(campus);
 
         return userRepository.save(newUser);
     }
@@ -37,18 +40,22 @@ public class UserService {
      * Logic for "Seller User Story 1": Seller Registration.
      * MUST create a SellerProfile and set isApproved = false.
      */
-    public User registerSeller(String username, String password, String canteenName) {
+    public User registerSeller(String username, String password, String canteenName, String phoneNumber, String campus) { // Updated arguments
         // 1. Create the User account
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(password);
         newUser.setRole(UserRole.SELLER);
 
+        // Save Contact Info for Sellers too
+        newUser.setPhoneNumber(phoneNumber);
+        newUser.setCampus(campus);
+
         // 2. Create the Profile (The "Application Form")
         SellerProfile profile = new SellerProfile();
         profile.setCanteenName(canteenName);
-        profile.setApproved(false); // Default to Pending [cite: 147]
-        profile.setUser(newUser);   // Link them together
+        profile.setApproved(false);
+        profile.setUser(newUser);
 
         newUser.setSellerProfile(profile);
 
@@ -91,5 +98,15 @@ public class UserService {
     // Helper for Admin Dashboard to see the list
     public List<SellerProfile> getPendingSellers() {
         return sellerRepository.findByIsApprovedFalse();
+    }
+
+    public User updateUserProfile(Long userId, String newPhone, String newCampus) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPhoneNumber(newPhone);
+        user.setCampus(newCampus);
+
+        return userRepository.save(user);
     }
 }

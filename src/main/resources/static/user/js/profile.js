@@ -28,7 +28,7 @@ async function loadProfileData() {
             const role = user.role ? user.role.toLowerCase() : "user";
             document.getElementById("profileRole").textContent = role.charAt(0).toUpperCase() + role.slice(1);
 
-            // Populate Details (NO EMAIL HERE)
+            // Populate Details
             document.getElementById("profilePhone").textContent = user.phoneNumber || "Not set";
             document.getElementById("profileCampus").textContent = user.campus || "Not set";
 
@@ -75,13 +75,7 @@ async function saveProfileChanges() {
     }
 }
 
-// --- LOGOUT FUNCTION FIXED ---
 function logout() {
-    // 1. Clear Session
     sessionStorage.clear();
-
-    // 2. Redirect to Root (Login Page)
-    // Using "/" ensures it goes to http://localhost:8080/index.html
-    // regardless of which folder you are currently in.
     window.location.href = "/CS9381_SoftEng_Finals/static/user/index.html";
 }

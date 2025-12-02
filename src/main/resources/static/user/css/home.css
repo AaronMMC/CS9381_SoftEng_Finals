@@ -2,20 +2,16 @@
     --primary-green: #108756;
     --hover-green: #0d6e46;
     --text-black: #000000;
-    --placeholder-gray: #b0b0b0; /* Added for Dashboard */
-    --bg-gray: #f8f9fa;           /* Added for Dashboard */
+    --placeholder-gray: #b0b0b0;
+    --bg-gray: #f8f9fa;
 }
 
-/* --- 1. GLOBAL DEFAULTS --- */
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: var(--bg-gray);
     margin: 0;
-    /* Removed fixed height/flex here so Dashboard can scroll */
 }
 
-/* --- 2. LOGIN / REGISTER LAYOUT ONLY --- */
-/* You must add class="login-layout" to the <body> of index.html and register.html */
 body.login-layout {
     height: 100vh;
     display: flex;
@@ -24,7 +20,6 @@ body.login-layout {
     background-color: #ffffff;
 }
 
-/* --- 3. LOGIN COMPONENT STYLES --- */
 .main-container {
     width: 100%;
     max-width: 400px;
@@ -87,9 +82,6 @@ a:hover {
     border-color: var(--primary-green);
 }
 
-/* --- 4. DASHBOARD SPECIFIC STYLES (NEW) --- */
-
-/* Search Bar */
 .search-container {
     background-color: var(--primary-green);
     border-radius: 15px;
@@ -117,7 +109,6 @@ a:hover {
     color: white;
 }
 
-/* Canteen Cards */
 .canteen-card {
     border: none;
     border-radius: 15px;
@@ -149,7 +140,6 @@ a:hover {
     transform: skewY(15deg);
 }
 
-/* Bottom Navigation */
 .bottom-nav {
     position: fixed;
     bottom: 0;

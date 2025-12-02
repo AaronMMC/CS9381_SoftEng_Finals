@@ -74,7 +74,6 @@ public class UserService {
             throw new Exception("Invalid password");
         }
 
-        // CRITICAL CHECK: If it's a seller, are they approved?
         if (user.getRole() == UserRole.SELLER) {
             if (!user.getSellerProfile().isApproved()) {
                 throw new Exception("Account is Pending Approval from Admin.");

@@ -7,13 +7,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // Display seller name
+    // Display static 'Seller' label for the dashboard per design
     const sellerNameEl = document.getElementById("sellerName");
-    if(user.sellerProfile && user.sellerProfile.canteenName) {
-        sellerNameEl.textContent = user.sellerProfile.canteenName;
-    } else {
-        sellerNameEl.textContent = user.username;
-    }
+    if (sellerNameEl) sellerNameEl.textContent = 'Seller';
 
     await loadStats();
     await loadSales();

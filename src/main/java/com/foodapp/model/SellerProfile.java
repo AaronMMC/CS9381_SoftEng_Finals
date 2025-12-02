@@ -1,6 +1,8 @@
 package com.foodapp.model;
 
 import jakarta.persistence.*;
+import java.util.List; // Import this!
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "seller_profiles")
@@ -10,15 +12,17 @@ public class SellerProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String canteenName; // e.g., "Oval Canteen", "Jared's Burgers"
+    private String canteenName;
 
     @Column(nullable = false)
-    private boolean isApproved = false; // Default is FALSE (Pending)
+    private boolean isApproved = false;
 
-    // Connects back to the User table
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FoodItem> menuItems = new ArrayList<>();
 
     // --- Getters and Setters ---
 
@@ -33,4 +37,8 @@ public class SellerProfile {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    // Getter and Setter for the new list
+    public List<FoodItem> getMenuItems() { return menuItems; }
+    public void setMenuItems(List<FoodItem> menuItems) { this.menuItems = menuItems; }
 }

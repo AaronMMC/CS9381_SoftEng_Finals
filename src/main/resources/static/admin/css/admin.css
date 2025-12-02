@@ -1,7 +1,179 @@
-body {
-    background-color: #e9ecef;
+:root {
+    --primary-green: #108756;
+    --hover-green: #0d6e46;
+    --bg-gray: #f8f9fa;
+    --text-dark: #333;
+    --card-radius: 20px;
 }
 
-#adminContent {
-    margin-top: 20px;
+body {
+    background-color: var(--bg-gray);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding-bottom: 90px;
+}
+
+.admin-header {
+    background-color: #ffffff;
+    padding: 20px 25px;
+    color: var(--primary-green);
+    font-weight: 800;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-green), var(--hover-green));
+    color: white;
+    border-radius: var(--card-radius);
+    padding: 25px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 20px rgba(16, 135, 86, 0.2);
+    transition: transform 0.2s;
+}
+
+.stat-card:active {
+    transform: scale(0.98);
+}
+
+.stat-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.activity-container {
+    background: white;
+    border-radius: var(--card-radius);
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.activity-text {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.search-container {
+    background-color: var(--primary-green);
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+.search-input::placeholder { color: rgba(255, 255, 255, 0.8); }
+.search-input:focus { background: transparent; color: white; box-shadow: none; }
+
+.seller-card {
+    background: white;
+    border-radius: var(--card-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+}
+
+.placeholder-img-sm {
+    width: 70px;
+    height: 70px;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-weight: bold;
+    font-size: 0.7rem;
+    margin-right: 15px;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background-color: white;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-item {
+    text-align: center;
+    color: #b0b0b0;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.nav-item.active {
+    color: var(--primary-green);
+}
+
+.nav-icon {
+    font-size: 1.8rem;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.active-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary-green);
+    border-radius: 50%;
+    margin: 0 auto;
 }

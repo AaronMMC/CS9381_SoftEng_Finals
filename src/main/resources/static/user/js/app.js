@@ -42,15 +42,17 @@ if (loginForm) {
 
                 sessionStorage.setItem("loggedInUser", JSON.stringify(user));
 
-                setTimeout(() => {
-                    if (user.role === 'SELLER') {
-                        window.location.href = "seller-dashboard.html";
-                    } else if (user.role === 'ADMIN') {
-                        window.location.href = "admin-dashboard.html";
-                    } else {
-                        window.location.href = "dashboard.html";
-                    }
-                }, 1000);
+            setTimeout(() => {
+                if (user.role === 'SELLER') {
+                    window.location.href = "../seller/dashboard.html";
+                }
+                else if (user.role === 'ADMIN') {
+                    window.location.href = "../admin/admin-dashboard.html";
+                }
+                else {
+                    window.location.href = "dashboard.html";
+                }
+            }, 1000);
 
             } else {
                 const errorText = await response.text();

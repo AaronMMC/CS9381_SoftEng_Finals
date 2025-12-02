@@ -5,7 +5,9 @@ import com.foodapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -15,28 +17,51 @@ public class AdminController {
     @Autowired
     private UserService userService;
 
-    /**
-     * Admin User Story 2: View Pending Sellers
-     * Endpoint: GET /api/admin/pending-sellers
-     * Returns a list of sellers where isApproved = false
-     */
+    @GetMapping("/stats")
+    public Map<String, Long> getDashboardStats() {
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("pendingCount", userService.countPendingSellers());
+        stats.put("activeSellersCount", userService.countActiveSellers());
+        return stats;
+    }
+
     @GetMapping("/pending-sellers")
-    public List<SellerProfile> viewPendingSellers() {
+    public List<SellerProfile> getPendingSellers() {
         return userService.getPendingSellers();
     }
 
-    /**
-     * Admin User Story 2: Approve Seller
-     * Endpoint: POST /api/admin/approve-seller/{sellerProfileId}
-     * Action: Sets isApproved = true
-     */
-    @PostMapping("/approve-seller/{sellerProfileId}")
-    public String approveSeller(@PathVariable Long sellerProfileId) {
+    @PostMapping("/approve/{sellerId}")
+    public String approveSeller(@PathVariable Long sellerId) {
         try {
-            userService.approveSeller(sellerProfileId);
-            return "Seller approved successfully. They can now log in.";
+            userService.approveSeller(sellerId);
+            return "Approved";
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            throw new RuntimeException("Error: " + e.getMessage());
         }
+    }
+
+    @DeleteMapping("/reject/{sellerId}")
+    public String rejectSeller(@PathVariable Long sellerId) {
+        try {
+            userService.rejectSeller(sellerId);
+            return "Rejected";
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/activities")
+    public List<com.foodapp.model.ActivityLog> getRecentActivities() {
+        return userService.getRecentActivities();
+    }
+
+    @GetMapping("/approved-sellers")
+    public List<SellerProfile> getApprovedSellers() {
+        return userService.getApprovedSellers();
+    }
+
+    @GetMapping("/all-sellers")
+    public List<SellerProfile> getAllSellers() {
+        return userService.getAllSellers();
     }
 }

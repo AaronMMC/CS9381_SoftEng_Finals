@@ -1,7 +1,23 @@
-body {
-    background-color: #f0f8ff;
-}
-
 #sellerContent {
     margin-top: 20px;
 }
+
+.seller-header {
+    background-color: #ffffff;
+    padding: 20px 25px;
+    color: var(--primary-green);
+    font-weight: 800;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.seller-header i { color: #333 !important; }
+
+#salesOverview .stat-card { height: 115px; }
+
+.activity-container .stat-card { padding: 18px; }
+
+.placeholder-img-sm { background-color: #f8faf8; }

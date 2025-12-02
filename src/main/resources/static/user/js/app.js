@@ -27,6 +27,9 @@ if (loginForm) {
             password: passwordInput
         };
 
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) loginBtn.disabled = true;
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -44,7 +47,7 @@ if (loginForm) {
 
             setTimeout(() => {
                 if (user.role === 'SELLER') {
-                    window.location.href = "../seller/dashboard.html";
+                    window.location.href = "../seller/seller-dashboard.html";
                 }
                 else if (user.role === 'ADMIN') {
                     window.location.href = "../admin/admin-dashboard.html";
@@ -56,19 +59,27 @@ if (loginForm) {
 
             } else {
                 const errorText = await response.text();
-
+                // If server returns a 'Login Failed' prefix, show the detail message for better UX
                 let displayError = "Invalid credentials.";
-                if (errorText.includes("Login Failed")) {
-                    displayError = "Login failed. Please check your password.";
+                if (errorText) {
+                    if (errorText.includes("Login Failed")) {
+                        const parts = errorText.split(":");
+                        displayError = parts.length > 1 ? parts.slice(1).join(":").trim() : "Login failed.";
+                    } else {
+                        displayError = errorText;
+                    }
                 }
 
                 messageArea.textContent = displayError;
                 messageArea.className = "mt-3 text-danger";
             }
-        } catch (error) {
+            } catch (error) {
             console.error(error);
             messageArea.textContent = "Server is offline or not responding.";
             messageArea.className = "mt-3 text-danger";
+        }
+        finally {
+            if (loginBtn) loginBtn.disabled = false;
         }
     });
 }

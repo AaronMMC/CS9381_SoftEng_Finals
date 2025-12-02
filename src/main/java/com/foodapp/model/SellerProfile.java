@@ -1,6 +1,7 @@
 package com.foodapp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List; // Import this!
 import java.util.ArrayList;
 
@@ -19,6 +20,7 @@ public class SellerProfile {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)

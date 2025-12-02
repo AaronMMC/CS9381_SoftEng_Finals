@@ -69,6 +69,9 @@ public class UserService {
         }
 
         if (user.getRole() == UserRole.SELLER) {
+            if (user.getSellerProfile() == null) {
+                throw new Exception("Seller profile is missing. Please contact admin.");
+            }
             if (!user.getSellerProfile().isApproved()) {
                 throw new Exception("Account is Pending Approval from Admin.");
             }

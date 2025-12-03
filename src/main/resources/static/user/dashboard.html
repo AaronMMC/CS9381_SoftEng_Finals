@@ -10,18 +10,28 @@
 </head>
 <body>
 
-<div class="container pt-3 pb-2">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold text-green m-0">Pick-A-Plate</h2>
-        <i class="bi bi-cart3 fs-2 text-green"></i>
+    <div class="container pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-bold text-green m-0">Pick-A-Plate</h2>
+    
+            <div class="position-relative cart-icon-wrapper" onclick="window.location.href='cart.html'">
+                <i class="bi bi-cart3 fs-2 text-green cart-icon"></i>
+                <span class="cart-badge-count">0</span>
+            </div>
+    
+        </div>
     </div>
-</div>
-
+    
 <div class="container mb-4">
-    <div class="search-container d-flex align-items-center px-3">
-        <i class="bi bi-search text-white me-2"></i>
-        <input type="text" class="form-control search-input" placeholder="Search food?">
-        <i class="bi bi-sliders text-white ms-2"></i> </div>
+    <div class="search-bar">
+        <i class="bi bi-search search-icon"></i>
+        <input
+            type="text"
+            id="dashboardSearchInput"
+            class="search-input"
+            placeholder="Search food?"
+        >
+    </div>
 </div>
 
 <div class="container pb-5 mb-5" id="canteenContainer">
@@ -36,7 +46,7 @@
         </div>
     </div>
 
-    <div class="card canteen-card shadow-sm mb-3">
+    <div class="card canteen-card shadow-sm mb-3" onclick="window.location.href='menu.html'">
         <div class="placeholder-img d-flex align-items-center justify-content-center">
             <h4 class="text-white fw-bold">PLACEHOLDER</h4>
         </div>
@@ -45,8 +55,7 @@
             <p class="card-text text-muted small mb-0">SLU Oval</p>
             <p class="card-text text-muted small">SLU Mary Heights Campus</p>
         </div>
-    </div>
-</div>
+    </div>    
 
 <div class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg">
 

@@ -1,48 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Pick-A-Plate</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/home.css">
-</head>
-<body class="login-layout">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="css/home.css" />
+  </head>
+  <body class="login-layout">
+    <div class="main-container text-center">
+      <h2 class="mb-0 text-black">Welcome to</h2>
+      <h2 class="text-green mb-5 fw-extra-bold">Pick-A-Plate</h2>
 
-<div class="main-container text-center">
-    <h2 class="mb-0 text-black">Welcome to</h2>
-    <h2 class="text-green mb-5 fw-extra-bold">Pick-A-Plate</h2>
+      <h3 class="text-center mb-3 text-green">Login</h3>
 
-    <h3 class="text-start mb-3 text-green">Login</h3>
-
-    <div class="mb-2">
+      <div class="mb-2">
         <i class="bi bi-person-fill icon-header"></i>
-    </div>
+      </div>
 
-    <form id="loginForm">
+      <form id="loginForm">
         <div class="mb-3">
-            <input type="text" class="form-control" id="username" placeholder="Username" required>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            placeholder="Username"
+            required
+          />
         </div>
 
         <div class="mb-1 position-relative">
-            <input type="password" class="form-control" id="password" placeholder="Password" required>
-            <i class="bi bi-eye position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
-               style="cursor: pointer;" onclick="togglePassword('password')"></i>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            placeholder="Password"
+            required
+          />
+          <i
+            class="bi bi-eye position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+            style="cursor: pointer"
+            onclick="togglePassword('password')"
+          ></i>
         </div>
 
         <div class="text-end mb-4">
-            <a href="#" class="small text-muted">Forgot password?</a>
+          <a href="#" class="small text-muted">Forgot password?</a>
         </div>
 
-        <button type="submit" id="loginBtn" class="btn btn-success-custom mb-3">Login</button>
+        <button type="submit" id="loginBtn" class="btn btn-success-custom mb-3">
+          Login
+        </button>
 
-        <p class="small text-muted">Don't have an account? <a href="register.html" class="fw-bold">Sign up</a></p>
-    </form>
+        <p class="small text-muted">
+          Don't have an account?
+          <a href="register.html" class="fw-bold">Sign up</a>
+        </p>
+      </form>
 
-    <div id="messageArea" class="mt-3 fw-bold"></div>
-</div>
+      <div id="messageArea" class="mt-3 fw-bold"></div>
+    </div>
 
-<script src="js/app.js"></script>
-</body>
+    <script src="js/app.js"></script>
+  </body>
 </html>

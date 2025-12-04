@@ -31,16 +31,16 @@
 
     <div class="row g-3 mb-4">
         <div class="col-6">
-            <div class="stat-card" onclick="showOrders()" style="cursor: pointer;">
+            <div class="stat-card" onclick="window.location.href='seller-orders.html'" style="cursor: pointer;">
                 <div class="stat-number" id="ordersCount">0</div>
                 <div class="stat-label">Orders</div>
             </div>
         </div>
         <div class="col-6">
             <div class="stat-card" style="background: linear-gradient(135deg, #333, #555); cursor: pointer;"
-                 onclick="showMenu()">
+                 onclick="window.location.href='seller-menu.html'">
                 <div class="stat-number" id="menuCount">0</div>
-                <div class="stat-label">Menu</div>
+                <div class="stat-label">Menu Items</div>
             </div>
         </div>
     </div>
@@ -57,18 +57,22 @@
 </div>
 
 <div class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg">
-    <div class="nav-item active text-center" onclick="window.location.href='seller-dashboard.html'">
-    <i class="bi bi-grid-fill nav-icon"></i>
-    <div class="active-dot"></div>
-    </div>
+        <div class="nav-item active text-center" onclick="window.location.href='seller-dashboard.html'">
+            <i class="bi bi-house-door fs-3"></i>
+            <div class="active-indicator"></div>
+        </div>
 
-    <div class="nav-item text-center text-muted" onclick="window.location.href='seller-orders.html'">
-        <i class="bi bi-list-ul nav-icon"></i>
-    </div>
+        <div class="nav-item text-center text-muted" onclick="window.location.href='seller-menu.html'">
+            <i class="bi bi-list-ul fs-3"></i>
+        </div>
 
-    <div class="nav-item text-center text-muted" onclick="window.location.href='seller-menu.html'">
-        <i class="bi bi-card-list nav-icon"></i>
-    </div>
+        <div class="nav-item text-center text-muted" onclick="window.location.href='seller-orders.html'">
+            <i class="bi bi-clock-history fs-3"></i>
+        </div>
+
+        <div class="nav-item text-center text-muted" onclick="window.location.href='seller-profile.html'">
+            <i class="bi bi-person fs-3"></i>
+        </div>
 
 </div>
 

@@ -56,9 +56,37 @@ public class MenuController {
         return menuService.getMenuBySeller(sellerId);
     }
 
+    /**
+     * Seller User Story 3: Update a Food Item
+     * Endpoint: PUT /api/menu/{foodId}
+     */
+    @PutMapping("/{foodId}")
+    public FoodItem updateFoodItem(@PathVariable Long foodId, @RequestBody UpdateRequest request) {
+        try {
+            return menuService.updateFoodItem(foodId, request.name, request.price, request.description);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * Seller: Delete a Food Item
+     * Endpoint: DELETE /api/menu/{foodId}
+     */
+    @DeleteMapping("/{foodId}")
+    public void deleteFoodItem(@PathVariable Long foodId) {
+        menuService.removeFoodItem(foodId);
+    }
+
     // Helper DTO for JSON input
     public static class FoodRequest {
         public Long sellerId;
+        public String name;
+        public Double price;
+        public String description;
+    }
+
+    public static class UpdateRequest {
         public String name;
         public Double price;
         public String description;

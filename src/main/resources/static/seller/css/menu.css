@@ -1,0 +1,128 @@
+body {
+  background-color: #f8f9fa;
+}
+
+/* SEARCH BAR */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #108756;
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.search-icon {
+  color: #ffffff;
+  font-size: 1rem;
+  margin-right: 8px;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* MENU CARDS */
+#menuList .menu-card-wrapper {
+  margin-bottom: 20px;
+}
+
+#menuList .card {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+}
+
+.menu-placeholder-img {
+  background-color: #d1d5db;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #f0f0f0;
+}
+
+.menu-placeholder-img::before {
+  content: "PLACEHOLDER";
+  letter-spacing: 1px;
+}
+
+.card-body {
+  padding: 10px 10px 12px 10px;
+}
+
+.food-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.food-availability {
+  font-size: 0.7rem;
+}
+
+.food-price {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.add-to-cart-btn {
+  font-size: 0.75rem;
+  padding-block: 4px;
+  margin-top: 6px;
+  border-radius: 999px;
+}
+
+.cart-badge {
+  position: relative;
+}
+
+.cart-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 0.6rem;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.cart-badge-count {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: #e11d48;
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: none;
+}
+
+.menu-food-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 16px 16px 0 0;
+}

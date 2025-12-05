@@ -32,7 +32,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // ACT: Register a new seller
-        User result = userService.registerSeller("new_canteen", "password123", "Oval Canteen");
+        User result = userService.registerSeller("new_canteen", "password123", "Oval Canteen", "", "");
 
         // ASSERT: Check System Constraint #3 (Seller Vetting Process)
         assertEquals(UserRole.SELLER, result.getRole());

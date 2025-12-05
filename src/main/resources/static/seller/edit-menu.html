@@ -137,96 +137,93 @@
 
     <hr class="mt-2 mb-3" />
 
-    <div class="container pb-5">
-      <div class="image-preview" id="imagePreview">
-        <span class="image-placeholder">
-          <i class="bi bi-image"></i>
-        </span>
-        <button type="button" class="image-edit-btn" onclick="document.getElementById('img').focus()">
-          <i class="bi bi-pencil"></i>
-        </button>
+    <div class="container pb-5 d-flex justify-content-center">
+      <div style="width:100%;max-width:400px;">
+        <form id="editForm">
+          <div class="form-section text-center">
+            <label class="form-label-custom">Image</label>
+            <div class="image-preview" id="imagePreview">
+              <span class="image-placeholder">
+                <i class="bi bi-image"></i>
+              </span>
+            </div>
+            <input type="file" id="imgFile" class="form-control mt-2" accept="image/*" onchange="previewImage(event)" required />
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-custom">Name</label>
+            <input
+              type="text"
+              id="name"
+              class="form-control"
+              placeholder="e.g., Pinakbet"
+              required
+            />
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-custom">Availability Status</label>
+            <select id="available" class="form-select">
+              <option value="true">Available</option>
+              <option value="false">Not Available</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-custom">Type</label>
+            <select id="type" class="form-select">
+              <option value="ulam">Ulam (Main Dish)</option>
+              <option value="merienda">Merienda (Snack)</option>
+              <option value="inumin">Inumin (Drink)</option>
+              <option value="kanin">Kanin (Rice)</option>
+              <option value="dessert">Dessert</option>
+              <option value="gulay">Gulay (Vegetable)</option>
+              <option value="sabaw">Sabaw (Soup)</option>
+              <option value="sidedish">Side Dish</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label-custom">Price (₱)</label>
+            <input
+              type="number"
+              step="0.01"
+              id="price"
+              class="form-control"
+              placeholder="₱ 0.00"
+              required
+            />
+          </div>
+
+          <div class="action-buttons">
+            <button type="button" class="btn-delete" onclick="deleteItem()">
+              <i class="bi bi-trash me-2"></i>Delete
+            </button>
+            <button type="button" class="btn-cancel" onclick="window.history.back()">
+              Cancel
+            </button>
+            <button type="submit" class="btn-save">
+              <i class="bi bi-check-lg me-2"></i>Save
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form id="editForm">
-        <div class="form-section">
-          <label class="form-label-custom">Image URL</label>
-          <input
-            type="text"
-            id="img"
-            class="form-control"
-            placeholder="https://example.com/image.jpg"
-            onchange="updateImagePreview()"
-          />
-        </div>
-
-        <div class="form-section">
-          <label class="form-label-custom">Name</label>
-          <input
-            type="text"
-            id="name"
-            class="form-control"
-            placeholder="e.g., Pinakbet"
-            required
-          />
-        </div>
-
-        <div class="form-section">
-          <label class="form-label-custom">Availability Status</label>
-          <select id="available" class="form-select">
-            <option value="true">Available</option>
-            <option value="false">Not Available</option>
-          </select>
-        </div>
-
-        <div class="form-section">
-          <label class="form-label-custom">Type</label>
-          <select id="type" class="form-select">
-            <option value="ulam">Ulam</option>
-            <option value="merienda">Merienda</option>
-            <option value="drink">Drink</option>
-          </select>
-        </div>
-
-        <div class="form-section">
-          <label class="form-label-custom">Price</label>
-          <input
-            type="number"
-            step="0.01"
-            id="price"
-            class="form-control"
-            placeholder="₱ 0.00"
-            required
-          />
-        </div>
-
-        <div class="action-buttons">
-          <button type="button" class="btn-delete" onclick="deleteItem()">
-            <i class="bi bi-trash me-2"></i>Delete
-          </button>
-          <button type="button" class="btn-cancel" onclick="window.history.back()">
-            Cancel
-          </button>
-          <button type="submit" class="btn-save">
-            <i class="bi bi-check-lg me-2"></i>Save
-          </button>
-        </div>
-      </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      function updateImagePreview() {
-        const imgUrl = document.getElementById('img').value;
+      function previewImage(event) {
         const preview = document.getElementById('imagePreview');
-        if (imgUrl.trim()) {
-          preview.innerHTML = `<img src="${imgUrl}" alt="Preview" onerror="resetImagePreview()">`;
-          preview.innerHTML += '<button type="button" class="image-edit-btn" onclick="document.getElementById(\'img\').focus()"><i class="bi bi-pencil"></i></button>';
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+          };
+          reader.readAsDataURL(file);
         } else {
-          resetImagePreview();
+          preview.innerHTML = '<span class="image-placeholder"><i class="bi bi-image"></i></span>';
         }
-      }
-      function resetImagePreview() {
-        document.getElementById('imagePreview').innerHTML = '<span class="image-placeholder"><i class="bi bi-image"></i></span><button type="button" class="image-edit-btn" onclick="document.getElementById(\'img\').focus()"><i class="bi bi-pencil"></i></button>';
       }
       function deleteItem() {
         if (confirm('Are you sure you want to delete this item?')) {

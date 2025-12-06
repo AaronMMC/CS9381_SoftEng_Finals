@@ -22,11 +22,14 @@ public class UserService {
     private SellerRepository sellerRepository;
 
     @Autowired
-    private ActivityLogRepository activityLogRepository; // NEW: For Dashboard History
+    private ActivityLogRepository activityLogRepository;
 
+    // --- HELPER: Save Activity ---
     private void logActivity(String message, String type) {
         activityLogRepository.save(new ActivityLog(message, type));
     }
+
+    // --- 1. REGISTRATION ---
 
     public User registerCustomer(String username, String password, String phoneNumber, String campus) {
         User newUser = new User();
@@ -48,17 +51,18 @@ public class UserService {
 
         SellerProfile profile = new SellerProfile();
         profile.setCanteenName(canteenName);
-        profile.setApproved(false);
+        profile.setApproved(false); // Default: Pending
+        profile.setSuspended(false); // Default: Active
         profile.setUser(newUser);
 
         newUser.setSellerProfile(profile);
 
         User savedUser = userRepository.save(newUser);
-
         logActivity("New application received: " + canteenName, "INFO");
-
         return savedUser;
     }
+
+    // --- 2. LOGIN (Updated for Suspension) ---
 
     public User login(String username, String password) throws Exception {
         User user = userRepository.findByUsername(username)
@@ -68,12 +72,19 @@ public class UserService {
             throw new Exception("Invalid password");
         }
 
+        // SELLER CHECKS
         if (user.getRole() == UserRole.SELLER) {
-            if (user.getSellerProfile() == null) {
-                throw new Exception("Seller profile is missing. Please contact admin.");
+            SellerProfile profile = user.getSellerProfile();
+
+            if (profile == null) {
+                throw new Exception("Seller profile is missing. Contact Admin.");
             }
-            if (!user.getSellerProfile().isApproved()) {
+            if (!profile.isApproved()) {
                 throw new Exception("Account is Pending Approval from Admin.");
+            }
+            // NEW: Block Login if Suspended
+            if (profile.isSuspended()) {
+                throw new Exception("Your account has been suspended. Contact Admin.");
             }
         }
         return user;
@@ -87,13 +98,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // --- 3. ADMIN ACTIONS ---
+
     public void approveSeller(Long sellerProfileId) throws Exception {
         SellerProfile profile = sellerRepository.findById(sellerProfileId)
                 .orElseThrow(() -> new Exception("Seller Profile not found"));
-
         profile.setApproved(true);
         sellerRepository.save(profile);
-
         logActivity("Approved seller: " + profile.getCanteenName(), "SUCCESS");
     }
 
@@ -102,27 +113,30 @@ public class UserService {
                 .orElseThrow(() -> new Exception("Profile not found"));
 
         String canteenName = profile.getCanteenName();
-
-        userRepository.delete(profile.getUser());
-
+        userRepository.delete(profile.getUser()); // Deletes User + Profile
         logActivity("Rejected application: " + canteenName, "DANGER");
     }
 
+    public void suspendSeller(Long sellerId) throws Exception {
+        SellerProfile profile = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new Exception("Seller not found"));
+        profile.setSuspended(true);
+        sellerRepository.save(profile);
+        logActivity("Suspended seller: " + profile.getCanteenName(), "DANGER");
+    }
+
+    public void reactivateSeller(Long sellerId) throws Exception {
+        SellerProfile profile = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new Exception("Seller not found"));
+        profile.setSuspended(false);
+        sellerRepository.save(profile);
+        logActivity("Reactivated seller: " + profile.getCanteenName(), "SUCCESS");
+    }
+
+    // --- 4. DATA FETCHING ---
+
     public List<SellerProfile> getPendingSellers() {
         return sellerRepository.findByIsApprovedFalse();
-    }
-
-    public long countPendingSellers() {
-        return sellerRepository.findByIsApprovedFalse().size();
-    }
-
-    public long countActiveSellers() {
-        long total = sellerRepository.count();
-        return total - countPendingSellers();
-    }
-
-    public List<ActivityLog> getRecentActivities() {
-        return activityLogRepository.findTop10ByOrderByTimestampDesc();
     }
 
     public List<SellerProfile> getApprovedSellers() {
@@ -131,5 +145,17 @@ public class UserService {
 
     public List<SellerProfile> getAllSellers() {
         return sellerRepository.findAll();
+    }
+
+    public long countPendingSellers() {
+        return sellerRepository.findByIsApprovedFalse().size();
+    }
+
+    public long countActiveSellers() {
+        return sellerRepository.count() - countPendingSellers();
+    }
+
+    public List<ActivityLog> getRecentActivities() {
+        return activityLogRepository.findTop10ByOrderByTimestampDesc();
     }
 }

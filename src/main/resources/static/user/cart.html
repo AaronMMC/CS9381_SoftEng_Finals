@@ -75,14 +75,15 @@
       </div>
 
       <div class="d-grid gap-2 mt-3">
-        <button
-          class="btn btn-success-custom location-btn d-flex justify-content-between align-items-center"
-          id="setLocationBtn"
-          type="button"
-        >
-          <span>Set Location:</span>
-          <span id="pickupLocation">Library</span>
-        </button>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="fw-bold">Set Location:</span>
+          <input
+            type="text"
+            class="form-control"
+            id="locationInput"
+            placeholder="Enter your location"
+          />
+        </div>
 
         <button
           class="btn btn-success-custom checkout-btn"
@@ -230,11 +231,8 @@
         });
 
         setLocationBtn.addEventListener("click", () => {
-          if (pickupLocation.textContent === "Library") {
-            pickupLocation.textContent = "Cafeteria";
-          } else {
-            pickupLocation.textContent = "Library";
-          }
+          const locationInput = document.getElementById("locationInput").value;
+          pickupLocation.textContent = locationInput || "Library"; // Default to "Library" if empty
         });
 
         checkoutBtn.addEventListener("click", () => {

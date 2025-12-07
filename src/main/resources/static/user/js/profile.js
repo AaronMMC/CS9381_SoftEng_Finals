@@ -75,6 +75,7 @@ async function saveProfileChanges() {
 }
 
 function logout() {
-  sessionStorage.clear();
-  window.location.href = "/CS9381_SoftEng_Finals/static/user/index.html";
+  localStorage.removeItem("userSession");
+  localStorage.removeItem("papCart");
+  window.location.href = "index.html";
 }

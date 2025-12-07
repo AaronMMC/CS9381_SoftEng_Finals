@@ -188,3 +188,8 @@ function formatCurrency(amount) {
     return '₱' + Number(amount).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
 
 }
+
+function logout() {
+    sessionStorage.clear();
+    window.location.href = "../user/index.html";
+}

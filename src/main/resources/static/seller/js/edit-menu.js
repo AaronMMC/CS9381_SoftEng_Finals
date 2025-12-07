@@ -1,76 +1,130 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const form = document.getElementById('editForm');
-  const nameInput = document.getElementById('name');
-  const priceInput = document.getElementById('price');
-  const availableInput = document.getElementById('available');
-  const imgInput = document.getElementById('img');
-  const typeInput = document.getElementById('type');
+document.addEventListener('DOMContentLoaded', async function () {
+    const form = document.getElementById('editForm');
+    const imgInput = document.getElementById('imgFile');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const foodId = sessionStorage.getItem('editingFoodId');
 
-  // Sample menu data (same as in menu.js for demo)
-  const SAMPLE_MENU = [
-    { id: 1, name: "Pinakbet", price: 80, available: true, img: "/user/img/Pinakbet.jpg", type: "ulam" },
-    { id: 2, name: "Sisig", price: 100, available: true, img: "/user/img/Sisig.webp", type: "ulam" },
-    { id: 3, name: "Rice", price: 20, available: true, img: "/user/img/Rice.webp", type: "merienda" },
-    { id: 4, name: "Sinigang", price: 100, available: false, img: "/user/img/Sinigang.jpg", type: "ulam" },
-    { id: 5, name: "Fried Chicken", price: 60, available: true, img: "/user/img/Chicken.jpg", type: "ulam" },
-    { id: 6, name: "Giniling", price: 80, available: true, img: "/user/img/Giniling.jpg", type: "ulam" },
-  ];
+    if (!foodId) {
+        alert("No item selected.");
+        window.location.href = 'seller-menu.html';
+        return;
+    }
 
-  const editingFoodId = parseInt(sessionStorage.getItem('editingFoodId'), 10);
-  if (!editingFoodId) { 
-    alert('No item selected'); 
-    window.location.href = 'seller-menu.html'; 
-    return; 
-  }
+    // 1. Attach Listeners
+    if (imgInput) {
+        imgInput.addEventListener('change', previewImage);
+    }
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteItem);
+    }
 
-  // Find item in sample menu
-  const item = SAMPLE_MENU.find(i => i.id === editingFoodId);
-  if (!item) { 
-    alert('Item not found'); 
-    window.location.href = 'seller-menu.html'; 
-    return; 
-  }
+    // 2. Fetch Item Details
+    try {
+        const response = await fetch(`/api/menu/${foodId}`);
+        if (!response.ok) throw new Error("Item not found");
 
-  // Populate form with item data
-  nameInput.value = item.name || '';
-  priceInput.value = item.price || 0;
-  availableInput.value = item.available ? 'true' : 'false';
-  imgInput.value = item.img || '';
-  typeInput.value = item.type || 'ulam';
+        const item = await response.json();
 
-  // Update image preview
-  if (item.img) {
+        // Fill Form
+        document.getElementById('name').value = item.name;
+        document.getElementById('price').value = item.price;
+        if (document.getElementById('description')) {
+            document.getElementById('description').value = item.description || "";
+        }
+
+        // Handle Availability dropdown
+        const availSelect = document.getElementById('available');
+        if (availSelect) availSelect.value = item.available ? 'true' : 'false';
+
+        // Show existing image
+        if (item.imageUrl) {
+            document.getElementById('imagePreview').innerHTML = `<img src="${item.imageUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+        }
+
+    } catch (e) {
+        console.error(e);
+        alert("Could not load item details.");
+        window.location.href = 'seller-menu.html';
+    }
+
+    // 3. Handle Update
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const price = parseFloat(document.getElementById('price').value);
+        const description = document.getElementById('description') ? document.getElementById('description').value : "";
+        const imgFile = imgInput.files[0];
+
+        let imageUrl = null;
+
+        if (imgFile) {
+            if (imgFile.size > 1048576) {
+                alert("Image is too large! Please choose an image under 1MB.");
+                return;
+            }
+            try {
+                imageUrl = await toBase64(imgFile);
+            } catch (err) {
+                console.error(err);
+                alert("Error processing image.");
+                return;
+            }
+        }
+
+        const payload = {
+            name: name,
+            price: price,
+            description: description,
+            imageUrl: imageUrl
+        };
+
+        try {
+            const response = await fetch(`/api/menu/${foodId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('Item updated!');
+                window.location.href = 'seller-menu.html';
+            } else {
+                alert('Update failed.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network error.');
+        }
+    });
+});
+
+function previewImage(event) {
     const preview = document.getElementById('imagePreview');
-    preview.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
-    preview.innerHTML += '<button type="button" class="image-edit-btn" onclick="document.getElementById(\'img\').focus()"><i class="bi bi-pencil"></i></button>';
-  }
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    
-    // For demo: just show success and redirect
-    alert('Item updated successfully!');
-    sessionStorage.removeItem('editingFoodId');
-    window.location.href = 'seller-menu.html';
+function deleteItem() {
+    if (confirm('Are you sure you want to delete this item?')) {
+        const foodId = sessionStorage.getItem('editingFoodId');
+        if (foodId) {
+            fetch(`/api/menu/${foodId}`, { method: 'DELETE' })
+                .then(r => r.ok ? window.location.href = 'seller-menu.html' : alert('Delete failed'))
+                .catch(() => alert('Error deleting item'));
+        }
+    }
+}
 
-    // Future: when connected to backend, use this:
-    // const payload = {
-    //   name: nameInput.value,
-    //   price: parseFloat(priceInput.value) || 0,
-    //   available: availableInput.value === 'true',
-    //   img: imgInput.value,
-    //   type: typeInput.value
-    // };
-    // fetch(`/api/menu/${editingFoodId}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(payload)
-    // })
-    //   .then(res => {
-    //     if (!res.ok) throw new Error('Update failed');
-    //     sessionStorage.removeItem('editingFoodId');
-    //     window.location.href = 'seller-menu.html';
-    //   })
-    //   .catch(err => alert('Failed to update item'));
-  });
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
 });

@@ -39,13 +39,16 @@ public class MenuService {
     /**
      * Logic for "Seller User Story 3 & 4": Update menu & price.
      */
-    public FoodItem updateFoodItem(Long foodId, String newName, Double newPrice, String newDesc) throws Exception {
+    public FoodItem updateFoodItem(Long foodId, String newName, Double newPrice, String newDesc, String newImg) throws Exception {
         FoodItem item = foodItemRepository.findById(foodId)
                 .orElseThrow(() -> new Exception("Food Item not found"));
 
         if (newName != null) item.setName(newName);
         if (newPrice != null) item.setPrice(newPrice);
         if (newDesc != null) item.setDescription(newDesc);
+
+        // FIX: Update the image if a new one is provided
+        if (newImg != null) item.setImageUrl(newImg);
 
         return foodItemRepository.save(item);
     }
@@ -77,5 +80,13 @@ public class MenuService {
      */
     public void removeFoodItem(Long foodId) {
         foodItemRepository.deleteById(foodId);
+    }
+
+    /**
+     * Helper to get a single food item for editing.
+     */
+    public FoodItem getFoodItem(Long foodId) throws Exception {
+        return foodItemRepository.findById(foodId)
+                .orElseThrow(() -> new Exception("Food Item not found"));
     }
 }

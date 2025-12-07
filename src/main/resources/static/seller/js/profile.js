@@ -1,3 +1,6 @@
+const API_BASE_URL = "http://localhost:8080";
+let currentUserId = null;
+
 document.addEventListener("DOMContentLoaded", async function () {
   // 1. Check Session
   const userRaw = sessionStorage.getItem("loggedInUser");
@@ -13,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.location.href = '../user/index.html';
     return;
   }
+  currentUserId = user.id;
 
   // 2. Setup UI Elements
   const profileName = document.getElementById("profileName");
@@ -26,8 +30,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // 3. Load Data from Backend
   try {
-    // If your backend endpoint is different, update this URL
-    const response = await fetch(`/api/users/${user.id}`);
+    const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`);
 
     if (response.ok) {
         const backendUser = await response.json();
@@ -44,31 +47,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   } catch (error) {
     console.error("Error loading profile:", error);
-  } finally {
-    // CRITICAL FIX: Force the spinner to hide
-    // We try multiple common IDs for the loader just in case
-    const loader = document.getElementById('loading-spinner') || document.querySelector('.spinner');
-    if (loader) loader.style.display = 'none';
-  }
-
-  // 4. Handle Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if(logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-          sessionStorage.clear();
-          window.location.href = '../user/index.html';
-      });
   }
 });
 
-// Function to save changes
+// --- GLOBAL FUNCTIONS (Must be outside DOMContentLoaded) ---
+
 async function saveProfileChanges() {
-  const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+  // Use the ID we stored globally or fetch from session again
+  const userRaw = sessionStorage.getItem("loggedInUser");
+  if (!userRaw) return;
+  const user = JSON.parse(userRaw);
+
   const newPhone = document.getElementById("editPhone").value;
   const newCampus = document.getElementById("editCampus").value;
 
   try {
-    const response = await fetch(`/api/users/${user.id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phoneNumber: newPhone, campus: newCampus }),
@@ -84,4 +78,9 @@ async function saveProfileChanges() {
     console.error("Update error:", error);
     alert("Server error.");
   }
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "../user/index.html";
 }

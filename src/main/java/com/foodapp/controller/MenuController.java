@@ -22,13 +22,12 @@ public class MenuController {
     @PostMapping("/add")
     public FoodItem addFoodItem(@RequestBody FoodRequest request) {
         try {
-            // FIXED: Now passing 5 arguments (including imageUrl)
             return menuService.addFoodItem(
                     request.sellerId,
                     request.name,
                     request.price,
                     request.description,
-                    request.imageUrl // <--- Added this line
+                    request.imageUrl
             );
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -61,18 +60,36 @@ public class MenuController {
     @PutMapping("/{foodId}")
     public FoodItem updateFoodItem(@PathVariable Long foodId, @RequestBody UpdateRequest request) {
         try {
-            return menuService.updateFoodItem(foodId, request.name, request.price, request.description);
+            // FIX: Pass the imageUrl from the request to the service
+            return menuService.updateFoodItem(
+                    foodId,
+                    request.name,
+                    request.price,
+                    request.description,
+                    request.imageUrl
+            );
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }
-
     /**
      * Seller: Delete a Food Item
      */
     @DeleteMapping("/{foodId}")
     public void deleteFoodItem(@PathVariable Long foodId) {
         menuService.removeFoodItem(foodId);
+    }
+
+    /**
+     * Endpoint to fetch a single item's details for the Edit form.
+     */
+    @GetMapping("/{foodId}")
+    public FoodItem getFoodItem(@PathVariable Long foodId) {
+        try {
+            return menuService.getFoodItem(foodId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     // --- Helper DTOs ---
@@ -82,7 +99,6 @@ public class MenuController {
         public String name;
         public Double price;
         public String description;
-        // FIXED: Added this field so the Controller can receive the image URL
         public String imageUrl;
     }
 
@@ -90,5 +106,6 @@ public class MenuController {
         public String name;
         public Double price;
         public String description;
+        public String imageUrl;
     }
 }

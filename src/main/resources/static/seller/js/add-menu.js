@@ -1,32 +1,57 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('addForm');
+    const imgInput = document.getElementById('imgFile'); // Get file input
 
+    // 1. Get User Session
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || !user.sellerProfile) {
+        alert("Please login as a seller.");
+        window.location.href = '../user/index.html';
+        return;
+    }
+
+    // 2. Attach Image Preview Listener
+    if (imgInput) {
+        imgInput.addEventListener('change', function(event) {
+            previewImage(event);
+        });
+    }
+
+    // 3. Handle Form Submit
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // 1. Check if User is Logged In
-        const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        if (!user || !user.sellerProfile) {
-            alert("Error: You are not logged in as a seller.");
-            window.location.href = '../user/index.html';
+        const name = document.getElementById('name').value;
+        const price = parseFloat(document.getElementById('price').value);
+        // Ensure description input exists in your HTML, otherwise default to empty string
+        const description = document.getElementById('description') ? document.getElementById('description').value : "";
+        const imgFile = imgInput.files[0];
+
+        if (!name || !price) {
+            alert("Name and Price are required.");
             return;
         }
 
-        // 2. Get Data from HTML Inputs
-        const nameVal = document.getElementById('name').value;
-        const priceVal = document.getElementById('price').value;
-        const descVal = document.getElementById('description') ? document.getElementById('description').value : "";
+        // Convert Image to Base64 String
+        let imageUrl = "";
+        if (imgFile) {
+            try {
+                imageUrl = await toBase64(imgFile);
+            } catch (err) {
+                console.error(err);
+                alert("Error processing image.");
+                return;
+            }
+        }
 
-        // 3. Create the JSON Payload
-        // This matches the 'FoodRequest' class in your MenuController.java
         const payload = {
             sellerId: user.sellerProfile.id,
-            name: nameVal,
-            price: parseFloat(priceVal),
-            description: descVal
+            name: name,
+            price: price,
+            description: description,
+            imageUrl: imageUrl
         };
 
-        // 4. Send to Backend
         try {
             const response = await fetch('/api/menu/add', {
                 method: 'POST',
@@ -36,15 +61,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (response.ok) {
                 alert('Item added successfully!');
-                window.location.href = 'seller-menu.html'; // Go back to menu to see the new item
+                window.location.href = 'seller-menu.html';
             } else {
-                const errorText = await response.text();
-                console.error("Server Error:", errorText);
-                alert('Failed to add item: ' + errorText);
+                alert('Failed to add item. Server error.');
             }
-        } catch (error) {
-            console.error("Network Error:", error);
-            alert('Could not connect to server.');
+        } catch (err) {
+            console.error(err);
+            alert('Network error.');
         }
     });
-});@
+});
+
+// Function to handle image preview
+function previewImage(event) {
+    const preview = document.getElementById('imagePreview');
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '<span class="image-placeholder"><i class="bi bi-image"></i></span>';
+    }
+}
+
+// Helper to convert file to text
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});

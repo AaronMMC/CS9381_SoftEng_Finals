@@ -18,6 +18,7 @@ public class FoodItem {
 
     private String description;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     // "Seller User Story 5": Seller can toggle Available / Sold Out

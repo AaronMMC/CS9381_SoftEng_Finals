@@ -126,7 +126,7 @@
 
       function getCart() {
         try {
-          const raw = localStorage.getItem(CART_KEY);
+          const raw = localStorage.getItem("papCart");
           return raw ? JSON.parse(raw) : [];
         } catch {
           return [];
@@ -134,12 +134,12 @@
       }
 
       function saveCart(cart) {
-        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        localStorage.setItem("papCart", JSON.stringify(cart));
       }
 
       function getOrders() {
         try {
-          const raw = localStorage.getItem(ORDERS_KEY);
+          const raw = localStorage.getItem("papOrders");
           return raw ? JSON.parse(raw) : [];
         } catch {
           return [];
@@ -147,7 +147,7 @@
       }
 
       function saveOrders(orders) {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+        localStorage.setItem("papOrders", JSON.stringify(orders));
       }
 
       function renderCart() {
@@ -201,7 +201,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         const cartContainer = document.getElementById("cartItems");
         const setLocationBtn = document.getElementById("setLocationBtn");
-        const pickupLocation = document.getElementById("pickupLocation");
         const checkoutBtn = document.getElementById("checkoutBtn");
 
         renderCart();
@@ -230,32 +229,36 @@
           renderCart();
         });
 
-        setLocationBtn.addEventListener("click", () => {
-          const locationInput = document.getElementById("locationInput").value;
-          pickupLocation.textContent = locationInput || "Library"; // Default to "Library" if empty
-        });
-
         checkoutBtn.addEventListener("click", () => {
           const cart = getCart();
+
           if (!cart.length) {
             alert("Your cart is empty.");
             return;
           }
 
-          const orders = getOrders();
+          const locationInput = document
+            .getElementById("locationInput")
+            .value.trim();
+
+          if (!locationInput) {
+            alert("Please enter a location.");
+            return;
+          }
+
           const newOrder = {
             id: Date.now(),
             items: cart,
-            location: pickupLocation.textContent,
+            location: locationInput,
             status: "Pending",
             createdAt: new Date().toISOString(),
           };
 
+          const orders = getOrders();
           orders.push(newOrder);
           saveOrders(orders);
           saveCart([]);
 
-          alert("Order placed! You can check it in My Orders.");
           window.location.href = "orders.html";
         });
       });

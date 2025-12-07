@@ -2,7 +2,6 @@ package com.foodapp.controller;
 
 import com.foodapp.model.User;
 import com.foodapp.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -45,14 +44,10 @@ public class AuthController {
      * Endpoint: POST /api/auth/login
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        try {
-            User user = userService.login(request.username, request.password);
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            // Return a 400 Bad Request with message instead of a runtime exception
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Login Failed: " + e.getMessage());
-        }
+    public ResponseEntity<User> login(@RequestBody AuthRequest request) throws Exception {
+        // Exception handler will catch errors
+        User user = userService.login(request.username, request.password);
+        return ResponseEntity.ok(user);
     }
 
     // Helper DTOs

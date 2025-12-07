@@ -8,5 +8,5 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Long> {
 
     // Seller User Story 3: "I can see all my menu items." [cite: 147]
     // Finds all food items belonging to a specific canteen
-    List<FoodItem> findBySellerId(Long sellerId);
+    List<FoodItem> findBySeller_Id(Long sellerId);
 }

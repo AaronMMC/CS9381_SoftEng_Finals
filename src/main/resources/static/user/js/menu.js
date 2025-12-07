@@ -1,184 +1,114 @@
 const CART_KEY = "papCart";
-
-// simple demo menu replace with API later if needed
-const SAMPLE_MENU = [
-  {
-    id: 1,
-    name: "Pinakbet",
-    price: 80,
-    available: true,
-    img: "img/Pinakbet.jpg",
-  },
-  { id: 2, name: "Sisig", price: 100, available: true, img: "img/Sisig.webp" },
-  { id: 3, name: "Rice", price: 20, available: true, img: "img/Rice.webp" },
-  {
-    id: 4,
-    name: "Sinigang",
-    price: 100,
-    available: false,
-    img: "img/Sinigang.jpg",
-  },
-  {
-    id: 5,
-    name: "Fried Chicken",
-    price: 60,
-    available: true,
-    img: "img/Chicken.jpg",
-  },
-  {
-    id: 6,
-    name: "Giniling",
-    price: 80,
-    available: true,
-    img: "img/Giniling.jpg",
-  },
-];
-
-function getSearchTermFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("search") || "";
-}
+const API_BASE_URL = "http://localhost:8080";
+const canteenId = sessionStorage.getItem("selectedCanteenId");
 
 document.addEventListener("DOMContentLoaded", () => {
-  const menuList = document.getElementById("menuList");
-  const searchInput = document.getElementById("searchInput");
+  if (!canteenId) {
+    alert("No canteen selected.");
+    window.location.href = "dashboard.html";
+    return;
+  }
+  loadMenu(canteenId);
+  updateCartBadge();
+});
 
-  if (!menuList) return;
+async function loadMenu(id) {
+    const menuList = document.getElementById("menuList");
+    // Show a loading text while fetching
+    menuList.innerHTML = "<p class='text-center text-muted mt-5'>Loading menu...</p>";
 
-  let currentItems = [...SAMPLE_MENU];
-
-  function getCart() {
     try {
-      const raw = localStorage.getItem(CART_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
+        const response = await fetch(`${API_BASE_URL}/api/menu/seller/${id}`);
+        if(!response.ok) throw new Error("Failed");
+
+        const items = await response.json();
+        renderMenu(items);
+    } catch (e) {
+        menuList.innerHTML = "<p class='text-danger text-center mt-5'>Could not load menu. Is the server running?</p>";
     }
-  }
+}
 
-  function saveCart(cart) {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    updateCartBadge();
-  }
-
-  function updateCartBadge() {
-    const badge = document.querySelector(".cart-badge-count");
-    if (!badge) return;
-    const cart = getCart();
-    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-    badge.textContent = totalQty || "";
-    badge.style.display = totalQty ? "inline-block" : "none";
-  }
-
-  function renderMenu(items) {
+function renderMenu(items) {
+    const menuList = document.getElementById("menuList");
     menuList.innerHTML = "";
 
-    if (!items.length) {
-      menuList.innerHTML = `<p class="text-center text-muted mt-4">No items found.</p>`;
-      return;
+    if (!items || items.length === 0) {
+        menuList.innerHTML = "<div class='text-center text-muted mt-5'><h5>Menu is empty</h5><p>This canteen hasn't added any food yet.</p></div>";
+        return;
     }
 
     items.forEach((item) => {
-      const col = document.createElement("div");
-      col.className = "col-6 menu-card-wrapper";
+        const col = document.createElement("div");
+        col.className = "col-6 menu-card-wrapper";
 
-      const availabilityLabel = item.available
-        ? `<span class="text-success">Available</span>`
-        : `<span class="text-danger">Not available</span>`;
+        const availabilityLabel = item.available
+            ? `<span class="text-success small fw-bold">Available</span>`
+            : `<span class="text-danger small fw-bold">Sold Out</span>`;
 
-      col.innerHTML = `
-        <div class="card h-100">
-          <img src="${item.img}" class="menu-food-img" alt="${item.name}">
-          <div class="card-body d-flex flex-column">
-            <div class="food-name">${item.name}</div>
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <div class="food-availability small">${availabilityLabel}</div>
-              <div class="food-price">₱ ${item.price}</div>
+        const imgUrl = item.imageUrl || 'img/placeholder.png';
+
+        // Prepare data for cart
+        const itemData = encodeURIComponent(JSON.stringify(item));
+
+        col.innerHTML = `
+            <div class="card h-100 shadow-sm border-0">
+                <div style="height: 120px; overflow: hidden; border-radius: 16px 16px 0 0;">
+                    <img src="${imgUrl}" class="menu-food-img" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="card-body d-flex flex-column p-2">
+                    <div class="food-name text-truncate fw-bold mb-1">${item.name}</div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        ${availabilityLabel}
+                        <div class="food-price fw-bold text-dark">₱ ${item.price}</div>
+                    </div>
+                    <button
+                        class="btn btn-success-custom add-to-cart-btn mt-auto w-100 btn-sm"
+                        onclick="addToCart('${itemData}')"
+                        ${item.available ? "" : "disabled"}
+                    >
+                        ${item.available ? '<i class="bi bi-plus-lg"></i> Add' : 'Sold Out'}
+                    </button>
+                </div>
             </div>
-            <button 
-              class="btn btn-success-custom add-to-cart-btn mt-auto"
-              data-id="${item.id}"
-              ${item.available ? "" : "disabled"}
-            >
-              ADD TO CART
-            </button>
-          </div>
-        </div>
-      `;
-
-      menuList.appendChild(col);
+        `;
+        menuList.appendChild(col);
     });
-  }
+}
 
-  function addToCart(itemId) {
-    const menuItem = SAMPLE_MENU.find((i) => i.id === itemId);
-    if (!menuItem) return;
+function addToCart(itemJson) {
+    const item = JSON.parse(decodeURIComponent(itemJson));
+    const cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 
-    const cart = getCart();
-    const existing = cart.find((i) => i.id === itemId);
+    // Check if cart has items from a different seller
+    if (cart.length > 0 && cart[0].sellerId !== item.sellerId) {
+        if(!confirm("Start a new basket? You can only order from one canteen at a time.")) return;
+        cart.length = 0; // Clear cart
+    }
+
+    const existing = cart.find(i => i.id === item.id);
     if (existing) {
-      existing.quantity += 1;
+        existing.quantity += 1;
     } else {
-      cart.push({
-        id: menuItem.id,
-        name: menuItem.name,
-        price: menuItem.price,
-        img: menuItem.img,
-        quantity: 1,
-      });
+        cart.push({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            img: item.imageUrl,
+            sellerId: item.sellerId,
+            quantity: 1
+        });
     }
 
-    saveCart(cart);
-  }
-
-  const urlSearchTerm = getSearchTermFromUrl().toLowerCase();
-
-  if (urlSearchTerm) {
-    currentItems = SAMPLE_MENU.filter((item) =>
-      item.name.toLowerCase().includes(urlSearchTerm)
-    );
-    if (searchInput) {
-      searchInput.value = urlSearchTerm;
-    }
-  }
-
-  renderMenu(currentItems);
-  updateCartBadge();
-
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      const term = searchInput.value.toLowerCase().trim();
-      currentItems = SAMPLE_MENU.filter((item) =>
-        item.name.toLowerCase().includes(term)
-      );
-      renderMenu(currentItems);
-    });
-
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-      }
-    });
-  }
-
-  menuList.addEventListener("click", (e) => {
-    const btn = e.target.closest(".add-to-cart-btn");
-    if (!btn) return;
-
-    const id = parseInt(btn.getAttribute("data-id"), 10);
-    addToCart(id);
-  });
-});
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartBadge();
+     alert("Added!");
+}
 
 function updateCartBadge() {
   const badge = document.querySelector(".cart-badge-count");
   if (!badge) return;
-
-  const cart = JSON.parse(localStorage.getItem("papCart") || "[]");
+  const cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   const total = cart.reduce((sum, item) => sum + item.quantity, 0);
-
   badge.textContent = total;
   badge.style.display = total > 0 ? "inline-block" : "none";
 }
-
-document.addEventListener("DOMContentLoaded", updateCartBadge);

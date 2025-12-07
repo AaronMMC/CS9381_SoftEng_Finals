@@ -34,7 +34,7 @@ class MenuServiceTest {
         when(foodItemRepository.save(any(FoodItem.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // ACT
-        FoodItem result = menuService.addFoodItem(1L, "Sisig", 100.00, "Spicy");
+        FoodItem result = menuService.addFoodItem(1L, "Sisig", 100.00, "Spicy", "sisig.jpg");
 
         // ASSERT
         assertTrue(result.isAvailable(), "New items should be Available by default");

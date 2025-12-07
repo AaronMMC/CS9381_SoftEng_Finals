@@ -75,7 +75,7 @@ public class OrderController {
      */
     @GetMapping("/customer/{customerId}")
     public List<Order> getCustomerOrders(@PathVariable Long customerId) {
-        return orderRepository.findByCustomerId(customerId);
+        return orderRepository.findByCustomer_Id(customerId);
     }
 
     /**
@@ -84,7 +84,7 @@ public class OrderController {
      */
     @GetMapping("/seller/{sellerId}")
     public List<Order> getSellerOrders(@PathVariable Long sellerId) {
-        return orderRepository.findBySellerId(sellerId);
+        return orderRepository.findBySeller_Id(sellerId);
     }
 
     // --- Helper DTO Class (Data Transfer Object) ---
@@ -107,7 +107,7 @@ public class OrderController {
 
         // 2. Count Total Orders
         // Spring Boot automatically understands this query
-        Long totalOrders = orderRepository.countBySellerId(sellerId);
+        Long totalOrders = orderRepository.countBySeller_Id(sellerId);
 
         // 3. Prepare the Response
         Map<String, Object> response = new HashMap<>();

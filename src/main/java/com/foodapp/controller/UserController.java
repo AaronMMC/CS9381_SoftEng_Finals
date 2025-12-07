@@ -31,4 +31,9 @@ public class UserController {
                 updatedData.getCampus()
         );
     }
+
+    @GetMapping("/sellers")
+    public java.util.List<com.foodapp.model.SellerProfile> getActiveSellers() {
+        return userService.getApprovedSellers();
+    }
 }

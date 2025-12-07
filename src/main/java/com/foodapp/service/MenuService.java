@@ -72,7 +72,7 @@ public class MenuService {
      * Helper to view a specific Canteen's Menu.
      */
     public List<FoodItem> getMenuBySeller(Long sellerId) {
-        return foodItemRepository.findBySellerId(sellerId);
+        return foodItemRepository.findBySeller_Id(sellerId);
     }
 
     /**

@@ -9,10 +9,10 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Find orders for a specific customer
-    List<Order> findByCustomerId(Long customerId);
+    List<Order> findByCustomer_Id(Long customerId);
 
     // Find orders for a specific seller
-    List<Order> findBySellerId(Long sellerId);
+    List<Order> findBySeller_Id(Long sellerId);
 
     // --- SALES OVERVIEW QUERY ---
     // Fixed: Changed 'totalAmount' to 'totalPrice' to match your Order.java file
@@ -20,5 +20,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Double calculateTotalRevenue(@Param("sellerId") Long sellerId);
 
     // Count total orders
-    Long countBySellerId(Long sellerId);
+    Long countBySeller_Id(Long sellerId);
 }

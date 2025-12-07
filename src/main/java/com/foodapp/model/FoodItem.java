@@ -1,5 +1,6 @@
 package com.foodapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -28,6 +29,7 @@ public class FoodItem {
     // Link to the Seller who owns this item
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonIgnore
     private SellerProfile seller;
 
     // --- Getters and Setters ---
@@ -43,11 +45,15 @@ public class FoodItem {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     public boolean isAvailable() { return isAvailable; }
     public void setAvailable(boolean available) { isAvailable = available; }
 
     public SellerProfile getSeller() { return seller; }
     public void setSeller(SellerProfile seller) { this.seller = seller; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public Long getSellerId() { return seller != null ? seller.getId() : null; }
+    public String getSellerName() { return seller != null ? seller.getCanteenName() : null; }
 }

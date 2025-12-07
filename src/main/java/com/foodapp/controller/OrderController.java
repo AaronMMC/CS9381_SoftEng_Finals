@@ -6,7 +6,7 @@ import com.foodapp.repository.OrderRepository;
 import com.foodapp.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,5 +93,28 @@ public class OrderController {
         public Long customerId;
         public Long sellerId;
         public Map<Long, Integer> items; // Key: FoodID, Value: Quantity
+    }
+
+    /**
+     * Seller User Story: Sales Overview (Total Revenue & Count)
+     * Endpoint: GET /api/orders/sales-overview/{sellerId}
+     */
+    @GetMapping("/sales-overview/{sellerId}")
+    public Map<String, Object> getSalesOverview(@PathVariable Long sellerId) {
+        // 1. Calculate Total Revenue
+        // NOTE: Make sure you added 'calculateTotalRevenue' to OrderRepository.java first!
+        Double totalRevenue = orderRepository.calculateTotalRevenue(sellerId);
+
+        // 2. Count Total Orders
+        // Spring Boot automatically understands this query
+        Long totalOrders = orderRepository.countBySellerId(sellerId);
+
+        // 3. Prepare the Response
+        Map<String, Object> response = new HashMap<>();
+        // If revenue is null (no sales yet), return 0.0
+        response.put("revenue", totalRevenue != null ? totalRevenue : 0.0);
+        response.put("orders", totalOrders != null ? totalOrders : 0);
+
+        return response;
     }
 }

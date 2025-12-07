@@ -1,85 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Pick-A-Plate – Menu</title>
-        <link
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pick-A-Plate – Menu</title>
+    <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
             rel="stylesheet"
-        />
-        <link
+    />
+    <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-        />
-        <link rel="stylesheet" href="../user/css/home.css" />
-        <link rel="stylesheet" href="../user/css/menu.css" />
-    </head>
-    <body>
-        <div class="container pt-3 pb-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="fw-bold text-green m-0">Pick-A-Plate</h2>
-      
-                    <div class="position-relative cart-icon-wrapper" onclick="window.location.href='seller-orders.html'">
-                            <i class="bi bi-cart3 fs-2 text-green cart-icon"></i>
-                            <span class="cart-badge-count">0</span>
-                    </div>
-      
-                </div>
-            </div>
-      
+    />
+    <link rel="stylesheet" href="../user/css/home.css" />
+    <link rel="stylesheet" href="../user/css/menu.css" />
+</head>
+<body>
+<div class="container pt-3 pb-2">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="fw-bold text-green m-0">Pick-A-Plate</h2>
 
-        <hr class="mt-0 mb-2" />
-
-        <div class="container pb-5">
-            <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
-                <div class="search-bar flex-grow-1 me-3">
-                    <i class="bi bi-search search-icon"></i>
-                    <input
-                        type="text"
-                        id="searchInput"
-                        class="search-input"
-                        placeholder="Search food?"
-                    />
-                </div>
-                <div>
-                    <button class="btn btn-sm btn-success" onclick="window.location.href='add-menu.html'"><i class="bi bi-plus-lg"></i> Add Item</button>
-                </div>
-            </div>
-
-                <div class="row" id="menuList">
-                </div>
-
-        <div
-            class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg"
-        >
-            <div
-                class="nav-item text-center text-muted"
-                onclick="window.location.href='seller-dashboard.html'"
-            >
-                <i class="bi bi-house-door fs-3"></i>
-            </div>
-
-            <div class="nav-item active text-center">
-                <i class="bi bi-list-ul fs-3"></i>
-                <div class="active-indicator"></div>
-            </div>
-
-            <div
-                class="nav-item text-center text-muted"
-                onclick="window.location.href='seller-orders.html'"
-            >
-                <i class="bi bi-clock-history fs-3"></i>
-            </div>
-
-            <div
-                class="nav-item text-center text-muted"
-                onclick="window.location.href='seller-profile.html'"
-            >
-                <i class="bi bi-person fs-3"></i>
-            </div>
+        <div class="position-relative cart-icon-wrapper" onclick="window.location.href='seller-orders.html'">
+            <i class="bi bi-cart3 fs-2 text-green cart-icon"></i>
+            <span class="cart-badge-count">0</span>
         </div>
+    </div>
+</div>
 
-        <script src="js/menu.js"></script>
-    </body>
+<hr class="mt-0 mb-2" />
+
+<div class="container pb-5">
+    <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
+        <div class="search-bar flex-grow-1 me-3">
+            <i class="bi bi-search search-icon"></i>
+            <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Search food?"
+            />
+        </div>
+        <div>
+            <button class="btn btn-sm btn-success" onclick="window.location.href='add-menu.html'"><i class="bi bi-plus-lg"></i> Add Item</button>
+        </div>
+    </div>
+
+    <div class="row" id="menuList">
+    </div>
+</div> <div
+        class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg"
+>
+    <div
+            class="nav-item text-center text-muted"
+            onclick="window.location.href='seller-dashboard.html'"
+    >
+        <i class="bi bi-house-door fs-3"></i>
+    </div>
+
+    <div class="nav-item active text-center">
+        <i class="bi bi-list-ul fs-3"></i>
+        <div class="active-indicator"></div>
+    </div>
+
+    <div
+            class="nav-item text-center text-muted"
+            onclick="window.location.href='seller-orders.html'"
+    >
+        <i class="bi bi-clock-history fs-3"></i>
+    </div>
+
+    <div
+            class="nav-item text-center text-muted"
+            onclick="window.location.href='seller-profile.html'"
+    >
+        <i class="bi bi-person fs-3"></i>
+    </div>
+</div>
+
+<script src="js/seller-menu.js"></script>
+</body>
 </html>

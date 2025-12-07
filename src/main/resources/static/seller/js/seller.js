@@ -140,4 +140,43 @@ function formatDate(dateString) {
 function logout() {
     sessionStorage.clear();
     window.location.href = "../user/index.html";
+
+function loadSales() {
+    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!user || !user.sellerProfile) return;
+
+    const sellerId = user.sellerProfile.id;
+    const salesContainer = document.getElementById('salesOverview');
+
+    // Show simple loading text
+    if(salesContainer) salesContainer.innerHTML = '<p class="text-muted text-center">Loading...</p>';
+
+    fetch(`/api/orders/sales-overview/${sellerId}`)
+        .then(res => res.json())
+        .then(data => {
+            // 1. Update the big Sales Overview Box
+            if(salesContainer) {
+                salesContainer.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-light">
+                        <div>
+                            <h4 class="text-success fw-bold mb-0">₱${data.revenue.toFixed(2)}</h4>
+                            <small class="text-muted">Total Revenue</small>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="fw-bold mb-0">${data.orders}</h4>
+                            <small class="text-muted">Total Orders</small>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. Update the Dashboard Cards (if they exist)
+            const ordersCount = document.getElementById('ordersCount');
+            if(ordersCount) ordersCount.textContent = data.orders;
+        })
+        .catch(err => console.error("Sales load error:", err));
+}
+
+// Run this when the page loads
+document.addEventListener('DOMContentLoaded', loadSales);
 }

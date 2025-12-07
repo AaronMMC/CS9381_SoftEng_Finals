@@ -18,16 +18,17 @@ public class MenuController {
     /**
      * Seller User Story 2: Add Food Item
      * Endpoint: POST /api/menu/add
-     * Body: { "sellerId": 1, "name": "Sisig", "price": 150.0, "description": "Spicy" }
      */
     @PostMapping("/add")
     public FoodItem addFoodItem(@RequestBody FoodRequest request) {
         try {
+            // FIXED: Now passing 5 arguments (including imageUrl)
             return menuService.addFoodItem(
                     request.sellerId,
                     request.name,
                     request.price,
-                    request.description
+                    request.description,
+                    request.imageUrl // <--- Added this line
             );
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -36,7 +37,6 @@ public class MenuController {
 
     /**
      * Seller User Story 5: Toggle Availability (Sold Out Switch)
-     * Endpoint: POST /api/menu/{foodId}/toggle-availability
      */
     @PostMapping("/{foodId}/toggle-availability")
     public FoodItem toggleAvailability(@PathVariable Long foodId) {
@@ -49,7 +49,6 @@ public class MenuController {
 
     /**
      * User Story 2: View a Seller's Menu
-     * Endpoint: GET /api/menu/seller/{sellerId}
      */
     @GetMapping("/seller/{sellerId}")
     public List<FoodItem> getMenu(@PathVariable Long sellerId) {
@@ -58,7 +57,6 @@ public class MenuController {
 
     /**
      * Seller User Story 3: Update a Food Item
-     * Endpoint: PUT /api/menu/{foodId}
      */
     @PutMapping("/{foodId}")
     public FoodItem updateFoodItem(@PathVariable Long foodId, @RequestBody UpdateRequest request) {
@@ -71,19 +69,21 @@ public class MenuController {
 
     /**
      * Seller: Delete a Food Item
-     * Endpoint: DELETE /api/menu/{foodId}
      */
     @DeleteMapping("/{foodId}")
     public void deleteFoodItem(@PathVariable Long foodId) {
         menuService.removeFoodItem(foodId);
     }
 
-    // Helper DTO for JSON input
+    // --- Helper DTOs ---
+
     public static class FoodRequest {
         public Long sellerId;
         public String name;
         public Double price;
         public String description;
+        // FIXED: Added this field so the Controller can receive the image URL
+        public String imageUrl;
     }
 
     public static class UpdateRequest {

@@ -18,6 +18,8 @@ public class FoodItem {
 
     private String description;
 
+    private String imageUrl;
+
     // "Seller User Story 5": Seller can toggle Available / Sold Out
     @Column(nullable = false)
     private boolean isAvailable = true;
@@ -45,4 +47,6 @@ public class FoodItem {
 
     public SellerProfile getSeller() { return seller; }
     public void setSeller(SellerProfile seller) { this.seller = seller; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -17,12 +17,8 @@ public class MenuService {
 
     @Autowired
     private SellerRepository sellerRepository;
-
-    /**
-     * Logic for "Seller User Story 2": Create the menu.
-     * Adds a new item to a specific seller's catalog.
-     */
-    public FoodItem addFoodItem(Long sellerId, String name, Double price, String description) throws Exception {
+    // Updated to accept 'imageUrl'
+    public FoodItem addFoodItem(Long sellerId, String name, Double price, String description, String imageUrl) throws Exception {
         SellerProfile seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new Exception("Seller not found"));
 
@@ -30,8 +26,12 @@ public class MenuService {
         newItem.setName(name);
         newItem.setPrice(price);
         newItem.setDescription(description);
-        newItem.setAvailable(true); // Default to available
-        newItem.setSeller(seller);  // Link this burger to this canteen
+
+        // --- ADD THIS LINE ---
+        newItem.setImageUrl(imageUrl);
+
+        newItem.setAvailable(true);
+        newItem.setSeller(seller);
 
         return foodItemRepository.save(newItem);
     }

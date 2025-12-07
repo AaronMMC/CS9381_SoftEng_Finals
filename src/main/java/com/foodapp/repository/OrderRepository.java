@@ -1,19 +1,24 @@
 package com.foodapp.repository;
 
 import com.foodapp.model.Order;
-import com.foodapp.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // User Story 8 & 9: View "My Orders" and "Order History" [cite: 145]
+    // Find orders for a specific customer
     List<Order> findByCustomerId(Long customerId);
 
-    // Seller User Story 7: View "Seller Order History" [cite: 149]
+    // Find orders for a specific seller
     List<Order> findBySellerId(Long sellerId);
 
-    // Seller User Story 6: View "Active Orders" queue [cite: 149]
-    // Example usage: repo.findBySellerIdAndStatus(1L, OrderStatus.PENDING);
-    List<Order> findBySellerIdAndStatus(Long sellerId, OrderStatus status);
+    // --- SALES OVERVIEW QUERY ---
+    // Fixed: Changed 'totalAmount' to 'totalPrice' to match your Order.java file
+    @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM Order o WHERE o.seller.id = :sellerId AND o.status = 'COMPLETED'")
+    Double calculateTotalRevenue(@Param("sellerId") Long sellerId);
+
+    // Count total orders
+    Long countBySellerId(Long sellerId);
 }

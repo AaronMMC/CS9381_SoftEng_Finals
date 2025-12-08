@@ -1,5 +1,6 @@
 package com.foodapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // IMPORT THIS!
 import jakarta.persistence.*;
 
 @Entity
@@ -11,10 +12,11 @@ public class OrderItem {
     private Long id;
 
     @Column(nullable = false)
-    private int quantity; // "Minimum of 1" [cite: 138]
+    private int quantity;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore // <--- CRITICAL FIX: Stops the infinite loop crash
     private Order order;
 
     @ManyToOne

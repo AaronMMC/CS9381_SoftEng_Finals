@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "orders") // 'order' is a reserved keyword in SQL, so we use 'orders'
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -15,22 +15,22 @@ public class Order {
 
     private Double totalPrice;
 
+    // --- NEW FIELD ---
+    private String deliveryLocation;
+
     @Enumerated(EnumType.STRING)
-    private OrderStatus status = OrderStatus.PENDING; // Default status
+    private OrderStatus status = OrderStatus.PENDING;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // The Student who bought the food
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
-    // The Canteen fulfilling the order (so they can see it in their dashboard)
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
     private SellerProfile seller;
 
-    // The list of food inside this order
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
@@ -40,6 +40,10 @@ public class Order {
 
     public Double getTotalPrice() { return totalPrice; }
     public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
+
+    // --- NEW GETTER & SETTER ---
+    public String getDeliveryLocation() { return deliveryLocation; }
+    public void setDeliveryLocation(String deliveryLocation) { this.deliveryLocation = deliveryLocation; }
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }

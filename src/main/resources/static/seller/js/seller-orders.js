@@ -3,193 +3,166 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnHistory = document.getElementById('btnHistory');
   const ordersList = document.getElementById('ordersList');
 
+  // 1. Check Session
   const userRaw = sessionStorage.getItem('loggedInUser');
   if (!userRaw) { window.location.href = '../user/index.html'; return; }
+
   let user;
   try { user = JSON.parse(userRaw); } catch { window.location.href = '../user/index.html'; return; }
+
   const sellerProfile = user.sellerProfile || user.seller || null;
-  if (!sellerProfile || !sellerProfile.id) { alert('Seller profile missing'); window.location.href = '../user/index.html'; return; }
+  if (!sellerProfile || !sellerProfile.id) {
+      alert('Seller profile missing');
+      window.location.href = '../user/index.html';
+      return;
+  }
   const sellerId = sellerProfile.id;
 
-  btnActive.addEventListener('click', () => loadOrders('active'));
-  btnHistory.addEventListener('click', () => loadOrders('history'));
+  // 2. Setup Tab Click Listeners (SWITCHING MODES)
+  if(btnActive) {
+      btnActive.addEventListener('click', () => {
+          updateTabs('active');
+          loadOrders('active');
+      });
+  }
 
+  if(btnHistory) {
+      btnHistory.addEventListener('click', () => {
+          updateTabs('history');
+          loadOrders('history');
+      });
+  }
+
+  // Helper to change button styles
+  function updateTabs(mode) {
+      if(mode === 'active') {
+          btnActive.className = "btn btn-success text-white fw-bold px-4";
+          btnHistory.className = "btn btn-outline-success fw-bold px-4";
+      } else {
+          btnActive.className = "btn btn-outline-success fw-bold px-4";
+          btnHistory.className = "btn btn-success text-white fw-bold px-4";
+      }
+  }
+
+  // 3. Load Orders Function
   function loadOrders(mode) {
-    ordersList.innerHTML = '<p class="text-muted">Loading...</p>';
+    ordersList.innerHTML = '<p class="text-muted text-center mt-4">Loading...</p>';
+
     fetch(`/api/orders/seller/${sellerId}`)
       .then(res => res.json())
       .then(orders => {
         let list = orders || [];
+
+        // --- FILTERING LOGIC ---
         if (mode === 'active') {
           list = list.filter(o => o.status === 'PENDING' || o.status === 'IN_PROGRESS' || o.status === 'READY_FOR_PICKUP');
         } else {
+          // History Mode: Show Completed and Cancelled
           list = list.filter(o => o.status === 'COMPLETED' || o.status === 'CANCELLED');
         }
 
-        if (!list.length) { ordersList.innerHTML = '<p class="text-muted">No orders.</p>'; return; }
+        if (!list.length) {
+            ordersList.innerHTML = `<p class="text-muted text-center mt-4">No ${mode} orders found.</p>`;
+            return;
+        }
+
+        // Sort: Newest first
+        list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         ordersList.innerHTML = list.map(o => {
-          const items = (o.items||[]).map(it => `<div>${it.foodName} x ${it.quantity}</div>`).join('');
+          const customerName = (o.customer && o.customer.username) ? o.customer.username : "Unknown Customer";
+          const location = o.deliveryLocation || "No location provided";
+
+          const itemsHtml = (o.orderItems || []).map(item =>
+              `<div class="d-flex justify-content-between small">
+                  <span>${item.quantity}x ${item.foodItem.name}</span>
+                  <span>₱${(item.foodItem.price * item.quantity).toFixed(2)}</span>
+               </div>`
+          ).join('');
+
+          // Buttons logic (Only for active tabs)
+          let buttons = '';
+          if (mode === 'active') {
+              if (o.status === 'PENDING') {
+                  buttons = `
+                      <button class="btn btn-sm btn-success flex-grow-1" data-id="${o.id}" data-action="accept"><i class="bi bi-check-lg"></i> Accept</button>
+                      <button class="btn btn-sm btn-danger flex-grow-1" data-id="${o.id}" data-action="deny"><i class="bi bi-x-lg"></i> Deny</button>
+                  `;
+              } else if (o.status === 'IN_PROGRESS') {
+                  buttons = `<button class="btn btn-sm btn-primary w-100" data-id="${o.id}" data-action="ready"><i class="bi bi-bell"></i> Mark Ready</button>`;
+              } else if (o.status === 'READY_FOR_PICKUP') {
+                  buttons = `<button class="btn btn-sm btn-secondary w-100" data-id="${o.id}" data-action="complete"><i class="bi bi-bag-check"></i> Complete</button>`;
+              }
+          } else {
+              // History Mode: No buttons, just status badge
+              let badgeClass = o.status === 'COMPLETED' ? 'bg-success' : 'bg-danger';
+              buttons = `<div class="w-100 text-center"><span class="badge ${badgeClass}">${o.status}</span></div>`;
+          }
+
           return `
-            <div class="card mb-2">
+            <div class="card mb-3 shadow-sm border-0" style="border-radius: 15px;">
               <div class="card-body">
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <div><strong>Order #${o.id}</strong></div>
-                    <div class="text-muted">Status: ${o.status}</div>
-                    <div class="small">Customer: ${o.customerId}</div>
-                  </div>
-                  <div class="text-end">
-                    <div>Total: ₱${(o.totalPrice||0).toFixed(2)}</div>
-                    <div class="mt-2">
-                      ${mode === 'active' ? `<button class="btn btn-sm btn-success" data-id="${o.id}" data-action="accept">Accept</button> <button class="btn btn-sm btn-warning" data-id="${o.id}" data-action="ready">Mark Ready</button> <button class="btn btn-sm btn-primary" data-id="${o.id}" data-action="complete">Complete</button>` : ''}
-                    </div>
-                  </div>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="fw-bold mb-0 text-success">Order #${o.id}</h6>
+                  <small class="text-muted">${new Date(o.createdAt).toLocaleDateString()} ${new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
                 </div>
-                <hr />
-                ${items}
+
+                <div class="mb-3 p-2 bg-light rounded">
+                    <div class="small fw-bold text-dark"><i class="bi bi-person-fill"></i> ${customerName}</div>
+                    <div class="small text-muted"><i class="bi bi-geo-alt-fill"></i> ${location}</div>
+                </div>
+
+                <div class="mb-3 border-top border-bottom py-2">
+                    ${itemsHtml}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold">Total</span>
+                    <span class="fw-bold text-success fs-5">₱${(o.totalPrice||0).toFixed(2)}</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    ${buttons}
+                </div>
               </div>
             </div>
           `;
         }).join('');
       })
-      .catch(err => { console.error(err); ordersList.innerHTML = '<p class="text-danger">Failed to load orders.</p>'; });
+      .catch(err => {
+          console.error(err);
+          ordersList.innerHTML = '<p class="text-danger text-center">Failed to load orders.</p>';
+      });
   }
 
-  // handle actions
+  // 4. Handle Actions
   ordersList.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
+
     const id = btn.getAttribute('data-id');
     const action = btn.getAttribute('data-action');
     let newStatus;
+
     if (action === 'accept') newStatus = 'IN_PROGRESS';
+    if (action === 'deny') {
+        if(!confirm("Reject this order?")) return;
+        newStatus = 'CANCELLED';
+    }
     if (action === 'ready') newStatus = 'READY_FOR_PICKUP';
     if (action === 'complete') newStatus = 'COMPLETED';
+
     if (!newStatus) return;
 
     fetch(`/api/orders/${id}/status?newStatus=${newStatus}`, { method: 'POST' })
-      .then(res => res.text())
-      .then(() => loadOrders('active'))
-      .catch(() => alert('Failed to update order status'));
+      .then(res => {
+          if(!res.ok) throw new Error("Action failed");
+          // Refresh the Active tab to show it moved
+          loadOrders('active');
+      })
+      .catch(err => alert('Failed to update order status'));
   });
 
-  // initial
+  // Initial Load
   loadOrders('active');
 });
-const API_BASE_URL = "http://localhost:8080";
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    if (!user || !user.sellerProfile) {
-        window.location.href = '../user/index.html';
-        return;
-    }
-    const sellerNameEl = document.getElementById('sellerName');
-    if (sellerNameEl) sellerNameEl.textContent = 'Seller';
-    await loadActiveOrders();
-    await loadPastOrders();
-});
-
-async function loadActiveOrders() {
-    const container = document.getElementById('activeOrdersContainer');
-    container.innerHTML = '<p class="text-muted small">Loading active orders...</p>';
-    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    try {
-        const resp = await fetch(`${API_BASE_URL}/api/orders/seller/${user.sellerProfile.id}`);
-        if (!resp.ok) throw new Error('Failed to fetch orders');
-        const orders = await resp.json();
-        const active = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED');
-        if (active.length === 0) {
-            container.innerHTML = '<p class="text-muted small">No active orders.</p>';
-            return;
-        }
-
-        container.innerHTML = '';
-        active.forEach(o => {
-            const item = document.createElement('div');
-            item.className = 'activity-item';
-            item.innerHTML = `
-                <div class="activity-icon-box bg-primary bg-opacity-10">
-                    <i class="bi bi-hourglass-split fs-5"></i>
-                </div>
-                <div>
-                  <div class='activity-text fw-semibold'>Order #${o.id} — ${o.status}</div>
-                  <div class='activity-time mt-1'>${formatDate(o.createdAt)} — ${formatCurrency(o.totalPrice)}</div>
-                  <div class='mt-2'>
-                      ${o.status === 'PENDING' ? `<button class='btn btn-sm btn-success me-2' onclick='updateOrderStatus(${o.id}, "IN_PROGRESS")'>Accept</button>` : ''}
-                      ${o.status === 'IN_PROGRESS' ? `<button class='btn btn-sm btn-primary me-2' onclick='updateOrderStatus(${o.id}, "READY_FOR_PICKUP")'>Mark as Ready</button>` : ''}
-                  </div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    } catch (e) {
-        console.error(e);
-        container.innerHTML = '<p class="text-danger small">Could not load active orders.</p>';
-    }
-}
-
-async function loadPastOrders() {
-    const container = document.getElementById('orderHistoryContainer');
-    container.innerHTML = '<p class="text-muted small">Loading order history...</p>';
-    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    try {
-        const resp = await fetch(`${API_BASE_URL}/api/orders/seller/${user.sellerProfile.id}`);
-        if (!resp.ok) throw new Error('Failed to fetch orders');
-        const orders = await resp.json();
-        const past = orders.filter(o => o.status === 'COMPLETED' || o.status === 'CANCELLED');
-        if (past.length === 0) {
-            container.innerHTML = '<p class="text-muted small">No order history.</p>';
-            return;
-        }
-
-        container.innerHTML = '';
-        past.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(o => {
-            const item = document.createElement('div');
-            item.className = 'activity-item';
-            item.innerHTML = `
-                <div class="activity-icon-box ${o.status === 'COMPLETED' ? 'bg-success' : 'bg-danger'} bg-opacity-10">
-                    <i class="bi ${o.status === 'COMPLETED' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'} fs-5"></i>
-                </div>
-                <div>
-                  <div class='activity-text fw-semibold'>Order #${o.id} — ${o.status}</div>
-                  <div class='activity-time mt-1'>${formatDate(o.createdAt)} — ${formatCurrency(o.totalPrice)}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    } catch (e) {
-        console.error(e);
-        container.innerHTML = '<p class="text-danger small">Could not load order history.</p>';
-    }
-}
-
-async function updateOrderStatus(orderId, status) {
-    try {
-        const resp = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status?newStatus=${status}`, { method: 'POST' });
-        if (!resp.ok) throw new Error('Failed to update status');
-        await loadActiveOrders();
-        await loadPastOrders();
-    } catch (e) {
-        console.error(e);
-        alert('Could not update order status.');
-    }
-}
-
-function formatDate(dateString) {
-    if(!dateString) return '';
-    const d = new Date(dateString);
-    return d.toLocaleString();
-}
-
-function formatCurrency(amount) {
-    if (!amount || isNaN(amount)) return '₱0.00';
-    return '₱' + Number(amount).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-
-}
-
-function logout() {
-    sessionStorage.clear();
-    window.location.href = "../user/index.html";
-}

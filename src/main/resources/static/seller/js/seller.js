@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // Display static 'Seller' label for the dashboard per design
+    // Display 'Seller' label
     const sellerNameEl = document.getElementById("sellerName");
     if (sellerNameEl) sellerNameEl.textContent = 'Seller';
 
@@ -28,7 +28,10 @@ async function loadStats() {
 
         if (ordersResp.ok) {
             const orders = await ordersResp.json();
-            document.getElementById("ordersCount").innerText = orders.length;
+            // Count active orders (Pending/Progress/Ready) for the "Orders" card
+            // You can change this to orders.length if you want to count EVERYTHING
+            const activeCount = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED').length;
+            document.getElementById("ordersCount").innerText = activeCount;
         }
 
         if (menuResp.ok) {
@@ -51,14 +54,17 @@ async function loadSales() {
         if(!resp.ok) { salesContainer.innerHTML = "<p class='text-danger small'>Failed to load sales.</p>"; return; }
 
         let orders = await resp.json();
-        // compute total sales (exclude cancelled)
-        const validOrders = orders.filter(o => o.status !== 'CANCELLED');
-        const totalSales = validOrders.reduce((s, o) => s + (o.totalPrice || 0), 0);
 
-        // compute today's sales
+        // --- FIX IS HERE: Filter ONLY 'COMPLETED' orders for revenue ---
+        const completedOrders = orders.filter(o => o.status === 'COMPLETED');
+
+        // Compute total sales
+        const totalSales = completedOrders.reduce((s, o) => s + (o.totalPrice || 0), 0);
+
+        // Compute today's sales
         const today = new Date();
         today.setHours(0,0,0,0);
-        const todaysTotal = validOrders.reduce((s, o) => {
+        const todaysTotal = completedOrders.reduce((s, o) => {
             const d = new Date(o.createdAt);
             if (d >= today) return s + (o.totalPrice || 0);
             return s;
@@ -86,7 +92,7 @@ async function loadSales() {
             </div>
         `;
 
-        // Show recent orders
+        // Show recent orders (Show ALL types here so seller sees activity)
         const recent = orders.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0,5);
         const recentEl = document.getElementById('recentOrders');
         if(recent.length === 0) {
@@ -96,11 +102,25 @@ async function loadSales() {
 
         recentEl.innerHTML = '';
         recent.forEach(o => {
+            let iconClass = 'bi-hourglass-split';
+            let bgClass = 'bg-primary';
+
+            if (o.status === 'COMPLETED') {
+                iconClass = 'bi-check-circle-fill';
+                bgClass = 'bg-success';
+            } else if (o.status === 'CANCELLED') {
+                iconClass = 'bi-x-circle-fill';
+                bgClass = 'bg-danger';
+            } else if (o.status === 'READY_FOR_PICKUP') {
+                iconClass = 'bi-bell-fill';
+                bgClass = 'bg-warning text-dark';
+            }
+
             const item = document.createElement('div');
             item.className = 'activity-item';
             item.innerHTML = `
-                <div class="activity-icon-box ${o.status === 'COMPLETED' ? 'bg-success' : o.status === 'CANCELLED' ? 'bg-danger' : 'bg-primary'} bg-opacity-10">
-                    <i class="bi ${o.status === 'COMPLETED' ? 'bi-check-circle-fill' : o.status === 'CANCELLED' ? 'bi-x-circle-fill' : 'bi-hourglass-split'} fs-5"></i>
+                <div class="activity-icon-box ${bgClass} bg-opacity-10">
+                    <i class="bi ${iconClass} fs-5"></i>
                 </div>
                 <div>
                    <div class='activity-text fw-semibold'>Order #${o.id} — ${o.status}</div>
@@ -114,16 +134,6 @@ async function loadSales() {
         console.error(e);
         salesContainer.innerHTML = "<p class='text-danger small'>Failed to load sales.</p>";
     }
-}
-
-function showOrders() {
-    // TODO: implement a separate orders page; for now, redirect to a placeholder
-    window.location.href = "seller-orders.html";
-}
-
-function showMenu() {
-    // TODO: implement a menu management page; for now, redirect to a placeholder
-    window.location.href = "seller-menu.html";
 }
 
 function formatCurrency(amount) {
@@ -140,43 +150,4 @@ function formatDate(dateString) {
 function logout() {
     sessionStorage.clear();
     window.location.href = "../user/index.html";
-
-function loadSales() {
-    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    if (!user || !user.sellerProfile) return;
-
-    const sellerId = user.sellerProfile.id;
-    const salesContainer = document.getElementById('salesOverview');
-
-    // Show simple loading text
-    if(salesContainer) salesContainer.innerHTML = '<p class="text-muted text-center">Loading...</p>';
-
-    fetch(`/api/orders/sales-overview/${sellerId}`)
-        .then(res => res.json())
-        .then(data => {
-            // 1. Update the big Sales Overview Box
-            if(salesContainer) {
-                salesContainer.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-light">
-                        <div>
-                            <h4 class="text-success fw-bold mb-0">₱${data.revenue.toFixed(2)}</h4>
-                            <small class="text-muted">Total Revenue</small>
-                        </div>
-                        <div class="text-end">
-                            <h4 class="fw-bold mb-0">${data.orders}</h4>
-                            <small class="text-muted">Total Orders</small>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 2. Update the Dashboard Cards (if they exist)
-            const ordersCount = document.getElementById('ordersCount');
-            if(ordersCount) ordersCount.textContent = data.orders;
-        })
-        .catch(err => console.error("Sales load error:", err));
-}
-
-// Run this when the page loads
-document.addEventListener('DOMContentLoaded', loadSales);
 }

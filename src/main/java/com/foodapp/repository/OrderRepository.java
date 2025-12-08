@@ -8,9 +8,11 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    // JOIN FETCH ensures the Customer data is loaded so the name isn't null
     @Query("SELECT o FROM Order o JOIN FETCH o.customer JOIN FETCH o.seller WHERE o.customer.id = :customerId")
     List<Order> findByCustomer_Id(@Param("customerId") Long customerId);
 
+    // JOIN FETCH ensures the Customer data is loaded for the Seller Dashboard
     @Query("SELECT o FROM Order o JOIN FETCH o.customer JOIN FETCH o.seller WHERE o.seller.id = :sellerId")
     List<Order> findBySeller_Id(@Param("sellerId") Long sellerId);
 

@@ -1,138 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pick-A-Plate – Order History</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="../user/css/home.css" />
-    <style>
-      .order-card {
-        background-color: #e5e7eb;
-        border-radius: 16px;
-        padding: 10px 14px;
-        margin-bottom: 10px;
-      }
-      .order-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 999px;
-        background-color: #108756;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 1.3rem;
-        margin-right: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container pt-3 pb-2">
-      <h2 class="fw-bold text-green m-0">Pick-A-Plate</h2>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pick-A-Plate – Order History</title>
+  <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+  />
+  <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
+  <link rel="stylesheet" href="../user/css/home.css" />
+  <style>
+    /* Styling for the history cards */
+    .order-card {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .status-completed { background-color: #d1fae5; color: #065f46; } /* Green */
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; } /* Red */
+  </style>
+</head>
+<body>
+<div class="container pt-3 pb-2">
+  <div class="d-flex align-items-center">
+    <a href="seller-orders.html" class="text-dark me-3"><i class="bi bi-arrow-left fs-4"></i></a>
+    <h2 class="fw-bold text-green m-0">History</h2>
+  </div>
+</div>
 
-    <hr class="mt-0 mb-2" />
+<hr class="mt-0 mb-2" />
 
-    <div class="container pb-5">
-      <h4 class="fw-bold mb-3">Order History</h4>
-      <div id="historyList"></div>
-    </div>
+<div class="container pb-5">
+  <div id="historyList">
+    <p class="text-center text-muted mt-5">Loading history...</p>
+  </div>
+</div>
 
-    <div
-      class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg"
-    >
-      <div
-        class="nav-item text-center text-muted"
-        onclick="window.location.href='seller-dashboard.html'"
-      >
-        <i class="bi bi-house-door fs-3"></i>
-      </div>
+<div class="bottom-nav d-flex justify-content-around align-items-center bg-white shadow-lg"
+     style="position: fixed; bottom: 0; width: 100%; height: 80px; z-index: 1000;">
+  <div class="nav-item text-center text-muted" onclick="window.location.href='seller-dashboard.html'">
+    <i class="bi bi-house-door fs-3"></i>
+  </div>
+  <div class="nav-item text-center text-muted" onclick="window.location.href='seller-menu.html'">
+    <i class="bi bi-list-ul fs-3"></i>
+  </div>
+  <div class="nav-item active text-center">
+    <i class="bi bi-clock-history fs-3 text-success"></i>
+    <div style="height: 4px; width: 30px; background-color: #108756; margin: 5px auto 0; border-radius: 2px;"></div>
+  </div>
+  <div class="nav-item text-center text-muted" onclick="window.location.href='seller-profile.html'">
+    <i class="bi bi-person fs-3"></i>
+  </div>
+</div>
 
-      <div
-        class="nav-item active text-center"
-        onclick="window.location.href='seller-orders.html'"
-      >
-        <i class="bi bi-cart3 fs-3"></i>
-        <div class="active-indicator"></div>
-      </div>
+<script>
+  const API_BASE_URL = "http://localhost:8080";
 
-      <div
-        class="nav-item text-center text-muted"
-        onclick="window.location.href='seller-profile.html'"
-      >
-        <i class="bi bi-person fs-3"></i>
-      </div>
-    </div>
-
-    <script>
-      const ORDERS_KEY = "papOrders";
-
-      function getOrders() {
-        try {
-          const raw = localStorage.getItem(ORDERS_KEY);
-          return raw ? JSON.parse(raw) : [];
-        } catch {
-          return [];
-        }
-      }
-
-      function statusClass(status) {
-        if (status === "Completed") return "text-success";
-        if (status === "Cancelled") return "text-danger";
-        if (status === "Ready for pickup") return "text-primary";
-        return "text-secondary";
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const container = document.getElementById("historyList");
-        const orders = getOrders().sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-
-        if (!orders.length) {
-          container.innerHTML =
-            '<p class="text-muted text-center mt-4">No order history yet.</p>';
+  document.addEventListener("DOMContentLoaded", () => {
+      // 1. Get Logged In Seller
+      const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+      if (!user || !user.sellerProfile) {
+          window.location.href = '../user/index.html';
           return;
-        }
+      }
+      // 2. Load History
+      loadHistory(user.sellerProfile.id);
+  });
 
-        orders.forEach((order) => {
-          const div = document.createElement("div");
-          div.className = "order-card";
+  function loadHistory(sellerId) {
+      const container = document.getElementById("historyList");
 
-          const itemLines = order.items.map((i) => `1x ${i.name}`).join("<br>");
+      // Fetch ALL orders for this seller from the Database
+      fetch(`${API_BASE_URL}/api/orders/seller/${sellerId}`)
+          .then(res => res.json())
+          .then(orders => {
+              // Filter: Keep only COMPLETED or CANCELLED
+              const history = orders.filter(o => o.status === 'COMPLETED' || o.status === 'CANCELLED');
 
-          div.innerHTML = `
-        <div class="d-flex align-items-center">
-          <div class="order-icon">
-            <i class="bi bi-bell-fill"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="small fw-bold">${itemLines}</div>
-            <div class="small mt-1">
-              Order Status:
-              <span class="fw-bold ${statusClass(order.status)}">
-                ${order.status}
-              </span>
-            </div>
-          </div>
-          <div class="text-end small ms-2">
-            <div>Order ID:</div>
-            <div class="fw-bold">${order.id}</div>
-          </div>
-        </div>
-      `;
+              // Sort: Newest first
+              history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-          container.appendChild(div);
-        });
-      });
-    </script>
-  </body>
+              if (history.length === 0) {
+                  container.innerHTML = '<p class="text-muted text-center mt-5">No order history found.</p>';
+                  return;
+              }
+
+              // Render the list
+              container.innerHTML = history.map(order => {
+                  // Format Items
+                  const itemsHtml = (order.orderItems || []).map(i =>
+                      `<div class="d-flex justify-content-between">
+                          <span>${i.quantity}x ${i.foodItem.name}</span>
+                       </div>`
+                  ).join('');
+
+                  // Safe Checks
+                  const customerName = (order.customer && order.customer.username) ? order.customer.username : "Unknown";
+                  const statusClass = order.status === 'COMPLETED' ? 'status-completed' : 'status-cancelled';
+                  const dateStr = new Date(order.createdAt).toLocaleString();
+
+                  return `
+                      <div class="order-card">
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fw-bold">Order #${order.id}</span>
+                              <span class="status-badge ${statusClass}">${order.status}</span>
+                          </div>
+                          <div class="small text-muted mb-2">
+                              <i class="bi bi-calendar-event"></i> ${dateStr} <br>
+                              <i class="bi bi-person"></i> ${customerName}
+                          </div>
+                          <div class="bg-light p-2 rounded small mb-2 text-dark">
+                              ${itemsHtml}
+                          </div>
+                          <div class="text-end fw-bold text-success">
+                              Total: ₱${(order.totalPrice || 0).toFixed(2)}
+                          </div>
+                      </div>
+                  `;
+              }).join('');
+          })
+          .catch(err => {
+              console.error(err);
+              container.innerHTML = '<p class="text-danger text-center mt-5">Failed to load history.</p>';
+          });
+  }
+</script>
+</body>
 </html>

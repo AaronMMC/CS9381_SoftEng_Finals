@@ -18,6 +18,8 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    // We inject the Repository directly for simple "Read" operations
+    // (Service is used for complex "Write" logic)
     @Autowired
     private OrderRepository orderRepository;
 
@@ -27,12 +29,16 @@ public class OrderController {
      * Body: { "customerId": 1, "sellerId": 2, "items": { "101": 2, "102": 1 } }
      */
     @PostMapping("/create")
-    public Order placeOrder(@RequestBody OrderRequest request) throws Exception {
-        return orderService.placeOrder(
-                request.customerId,
-                request.sellerId,
-                request.items
-        );
+    public Order placeOrder(@RequestBody OrderRequest request) {
+        try {
+            return orderService.placeOrder(
+                    request.customerId,
+                    request.sellerId,
+                    request.items
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage()); // Returns 500 Error to user
+        }
     }
 
     /**
@@ -40,9 +46,13 @@ public class OrderController {
      * Endpoint: POST /api/orders/{orderId}/cancel
      */
     @PostMapping("/{orderId}/cancel")
-    public String cancelOrder(@PathVariable Long orderId) throws Exception {
-        orderService.cancelOrder(orderId);
-        return "Order cancelled successfully.";
+    public String cancelOrder(@PathVariable Long orderId) {
+        try {
+            orderService.cancelOrder(orderId);
+            return "Order cancelled successfully.";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
 
     /**
@@ -50,9 +60,13 @@ public class OrderController {
      * Endpoint: POST /api/orders/{orderId}/status?newStatus=READY_FOR_PICKUP
      */
     @PostMapping("/{orderId}/status")
-    public String updateStatus(@PathVariable Long orderId, @RequestParam OrderStatus newStatus) throws Exception {
-        orderService.updateStatus(orderId, newStatus);
-        return "Status updated to " + newStatus;
+    public String updateStatus(@PathVariable Long orderId, @RequestParam OrderStatus newStatus) {
+        try {
+            orderService.updateStatus(orderId, newStatus);
+            return "Status updated to " + newStatus;
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
 
     /**
@@ -88,6 +102,7 @@ public class OrderController {
     @GetMapping("/sales-overview/{sellerId}")
     public Map<String, Object> getSalesOverview(@PathVariable Long sellerId) {
         // 1. Calculate Total Revenue
+        // NOTE: Make sure you added 'calculateTotalRevenue' to OrderRepository.java first!
         Double totalRevenue = orderRepository.calculateTotalRevenue(sellerId);
 
         // 2. Count Total Orders

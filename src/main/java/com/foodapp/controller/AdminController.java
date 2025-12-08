@@ -52,26 +52,42 @@ public class AdminController {
     // --- ACTIONS ---
 
     @PostMapping("/approve/{sellerId}")
-    public String approveSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
-        userService.approveSeller(sellerId);
-        return "Approved";
+    public String approveSeller(@PathVariable("sellerId") Long sellerId) {
+        try {
+            userService.approveSeller(sellerId);
+            return "Approved";
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/reject/{sellerId}")
-    public String rejectSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
-        userService.rejectSeller(sellerId);
-        return "Rejected";
+    public String rejectSeller(@PathVariable("sellerId") Long sellerId) {
+        try {
+            userService.rejectSeller(sellerId);
+            return "Rejected";
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/suspend/{sellerId}")
-    public String suspendSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
-        userService.suspendSeller(sellerId);
-        return "Suspended";
+    public String suspendSeller(@PathVariable("sellerId") Long sellerId) {
+        try {
+            userService.suspendSeller(sellerId);
+            return "Suspended";
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/reactivate/{sellerId}")
-    public String reactivateSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
-        userService.reactivateSeller(sellerId);
-        return "Reactivated";
+    public String reactivateSeller(@PathVariable("sellerId") Long sellerId) {
+        try {
+            userService.reactivateSeller(sellerId);
+            return "Reactivated";
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
     }
 }

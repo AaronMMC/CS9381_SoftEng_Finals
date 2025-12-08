@@ -8,7 +8,6 @@ import com.foodapp.repository.ActivityLogRepository;
 import com.foodapp.repository.SellerRepository;
 import com.foodapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder; // Import this
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,9 +24,7 @@ public class UserService {
     @Autowired
     private ActivityLogRepository activityLogRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder; // NEW: Inject Security Tool
-
+    // --- HELPER: Save Activity ---
     private void logActivity(String message, String type) {
         activityLogRepository.save(new ActivityLog(message, type));
     }
@@ -37,7 +34,7 @@ public class UserService {
     public User registerCustomer(String username, String password, String phoneNumber, String campus) {
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(passwordEncoder.encode(password));
+        newUser.setPassword(password);
         newUser.setRole(UserRole.CUSTOMER);
         newUser.setPhoneNumber(phoneNumber);
         newUser.setCampus(campus);
@@ -47,15 +44,15 @@ public class UserService {
     public User registerSeller(String username, String password, String canteenName, String phoneNumber, String campus) {
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(passwordEncoder.encode(password));
+        newUser.setPassword(password);
         newUser.setRole(UserRole.SELLER);
         newUser.setPhoneNumber(phoneNumber);
         newUser.setCampus(campus);
 
         SellerProfile profile = new SellerProfile();
         profile.setCanteenName(canteenName);
-        profile.setApproved(false);
-        profile.setSuspended(false);
+        profile.setApproved(false); // Default: Pending
+        profile.setSuspended(false); // Default: Active
         profile.setUser(newUser);
 
         newUser.setSellerProfile(profile);
@@ -65,16 +62,17 @@ public class UserService {
         return savedUser;
     }
 
-    // --- 2. LOGIN ---
+    // --- 2. LOGIN (Updated for Suspension) ---
 
     public User login(String username, String password) throws Exception {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new Exception("User not found"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!user.getPassword().equals(password)) {
             throw new Exception("Invalid password");
         }
 
+        // SELLER CHECKS
         if (user.getRole() == UserRole.SELLER) {
             SellerProfile profile = user.getSellerProfile();
 
@@ -84,6 +82,7 @@ public class UserService {
             if (!profile.isApproved()) {
                 throw new Exception("Account is Pending Approval from Admin.");
             }
+            // NEW: Block Login if Suspended
             if (profile.isSuspended()) {
                 throw new Exception("Your account has been suspended. Contact Admin.");
             }
@@ -114,7 +113,7 @@ public class UserService {
                 .orElseThrow(() -> new Exception("Profile not found"));
 
         String canteenName = profile.getCanteenName();
-        userRepository.delete(profile.getUser());
+        userRepository.delete(profile.getUser()); // Deletes User + Profile
         logActivity("Rejected application: " + canteenName, "DANGER");
     }
 

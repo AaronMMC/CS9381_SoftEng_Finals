@@ -20,22 +20,30 @@ public class MenuController {
      * Endpoint: POST /api/menu/add
      */
     @PostMapping("/add")
-    public FoodItem addFoodItem(@RequestBody FoodRequest request) throws Exception {
-        return menuService.addFoodItem(
-                request.sellerId,
-                request.name,
-                request.price,
-                request.description,
-                request.imageUrl
-        );
+    public FoodItem addFoodItem(@RequestBody FoodRequest request) {
+        try {
+            return menuService.addFoodItem(
+                    request.sellerId,
+                    request.name,
+                    request.price,
+                    request.description,
+                    request.imageUrl
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
      * Seller User Story 5: Toggle Availability (Sold Out Switch)
      */
     @PostMapping("/{foodId}/toggle-availability")
-    public FoodItem toggleAvailability(@PathVariable Long foodId) throws Exception {
-        return menuService.toggleAvailability(foodId);
+    public FoodItem toggleAvailability(@PathVariable Long foodId) {
+        try {
+            return menuService.toggleAvailability(foodId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -50,14 +58,19 @@ public class MenuController {
      * Seller User Story 3: Update a Food Item
      */
     @PutMapping("/{foodId}")
-    public FoodItem updateFoodItem(@PathVariable Long foodId, @RequestBody UpdateRequest request) throws Exception {
-        return menuService.updateFoodItem(
-                foodId,
-                request.name,
-                request.price,
-                request.description,
-                request.imageUrl
-        );
+    public FoodItem updateFoodItem(@PathVariable Long foodId, @RequestBody UpdateRequest request) {
+        try {
+            // FIX: Pass the imageUrl from the request to the service
+            return menuService.updateFoodItem(
+                    foodId,
+                    request.name,
+                    request.price,
+                    request.description,
+                    request.imageUrl
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
     /**
      * Seller: Delete a Food Item
@@ -71,8 +84,12 @@ public class MenuController {
      * Endpoint to fetch a single item's details for the Edit form.
      */
     @GetMapping("/{foodId}")
-    public FoodItem getFoodItem(@PathVariable Long foodId) throws Exception {
-        return menuService.getFoodItem(foodId);
+    public FoodItem getFoodItem(@PathVariable Long foodId) {
+        try {
+            return menuService.getFoodItem(foodId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     // --- Helper DTOs ---

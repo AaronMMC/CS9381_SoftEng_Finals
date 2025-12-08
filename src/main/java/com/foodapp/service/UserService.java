@@ -8,6 +8,7 @@ import com.foodapp.repository.ActivityLogRepository;
 import com.foodapp.repository.SellerRepository;
 import com.foodapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,17 +25,17 @@ public class UserService {
     @Autowired
     private ActivityLogRepository activityLogRepository;
 
-    // --- HELPER: Save Activity ---
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private void logActivity(String message, String type) {
         activityLogRepository.save(new ActivityLog(message, type));
     }
 
-    // --- 1. REGISTRATION ---
-
     public User registerCustomer(String username, String password, String phoneNumber, String campus) {
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(password);
+        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(UserRole.CUSTOMER);
         newUser.setPhoneNumber(phoneNumber);
         newUser.setCampus(campus);
@@ -44,15 +45,15 @@ public class UserService {
     public User registerSeller(String username, String password, String canteenName, String phoneNumber, String campus) {
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(password);
+        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(UserRole.SELLER);
         newUser.setPhoneNumber(phoneNumber);
         newUser.setCampus(campus);
 
         SellerProfile profile = new SellerProfile();
         profile.setCanteenName(canteenName);
-        profile.setApproved(false); // Default: Pending
-        profile.setSuspended(false); // Default: Active
+        profile.setApproved(false);
+        profile.setSuspended(false);
         profile.setUser(newUser);
 
         newUser.setSellerProfile(profile);
@@ -62,30 +63,20 @@ public class UserService {
         return savedUser;
     }
 
-    // --- 2. LOGIN (Updated for Suspension) ---
-
     public User login(String username, String password) throws Exception {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new Exception("User not found"));
 
-        if (!user.getPassword().equals(password)) {
+        // VERIFY HASH
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new Exception("Invalid password");
         }
 
-        // SELLER CHECKS
         if (user.getRole() == UserRole.SELLER) {
             SellerProfile profile = user.getSellerProfile();
-
-            if (profile == null) {
-                throw new Exception("Seller profile is missing. Contact Admin.");
-            }
-            if (!profile.isApproved()) {
-                throw new Exception("Account is Pending Approval from Admin.");
-            }
-            // NEW: Block Login if Suspended
-            if (profile.isSuspended()) {
-                throw new Exception("Your account has been suspended. Contact Admin.");
-            }
+            if (profile == null) throw new Exception("Seller profile is missing. Contact Admin.");
+            if (!profile.isApproved()) throw new Exception("Account is Pending Approval from Admin.");
+            if (profile.isSuspended()) throw new Exception("Your account has been suspended. Contact Admin.");
         }
         return user;
     }
@@ -98,8 +89,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // --- 3. ADMIN ACTIONS ---
-
     public void approveSeller(Long sellerProfileId) throws Exception {
         SellerProfile profile = sellerRepository.findById(sellerProfileId)
                 .orElseThrow(() -> new Exception("Seller Profile not found"));
@@ -111,9 +100,8 @@ public class UserService {
     public void rejectSeller(Long sellerProfileId) throws Exception {
         SellerProfile profile = sellerRepository.findById(sellerProfileId)
                 .orElseThrow(() -> new Exception("Profile not found"));
-
         String canteenName = profile.getCanteenName();
-        userRepository.delete(profile.getUser()); // Deletes User + Profile
+        userRepository.delete(profile.getUser());
         logActivity("Rejected application: " + canteenName, "DANGER");
     }
 
@@ -133,29 +121,10 @@ public class UserService {
         logActivity("Reactivated seller: " + profile.getCanteenName(), "SUCCESS");
     }
 
-    // --- 4. DATA FETCHING ---
-
-    public List<SellerProfile> getPendingSellers() {
-        return sellerRepository.findByIsApprovedFalse();
-    }
-
-    public List<SellerProfile> getApprovedSellers() {
-        return sellerRepository.findByIsApprovedTrue();
-    }
-
-    public List<SellerProfile> getAllSellers() {
-        return sellerRepository.findAll();
-    }
-
-    public long countPendingSellers() {
-        return sellerRepository.findByIsApprovedFalse().size();
-    }
-
-    public long countActiveSellers() {
-        return sellerRepository.count() - countPendingSellers();
-    }
-
-    public List<ActivityLog> getRecentActivities() {
-        return activityLogRepository.findTop10ByOrderByTimestampDesc();
-    }
+    public List<SellerProfile> getPendingSellers() { return sellerRepository.findByIsApprovedFalse(); }
+    public List<SellerProfile> getApprovedSellers() { return sellerRepository.findByIsApprovedTrue(); }
+    public List<SellerProfile> getAllSellers() { return sellerRepository.findAll(); }
+    public long countPendingSellers() { return sellerRepository.findByIsApprovedFalse().size(); }
+    public long countActiveSellers() { return sellerRepository.count() - countPendingSellers(); }
+    public List<ActivityLog> getRecentActivities() { return activityLogRepository.findTop10ByOrderByTimestampDesc(); }
 }

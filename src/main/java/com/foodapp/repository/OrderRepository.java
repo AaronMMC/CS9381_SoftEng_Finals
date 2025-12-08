@@ -8,17 +8,14 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Find orders for a specific customer
-    List<Order> findByCustomer_Id(Long customerId);
+    @Query("SELECT o FROM Order o JOIN FETCH o.customer JOIN FETCH o.seller WHERE o.customer.id = :customerId")
+    List<Order> findByCustomer_Id(@Param("customerId") Long customerId);
 
-    // Find orders for a specific seller
-    List<Order> findBySeller_Id(Long sellerId);
+    @Query("SELECT o FROM Order o JOIN FETCH o.customer JOIN FETCH o.seller WHERE o.seller.id = :sellerId")
+    List<Order> findBySeller_Id(@Param("sellerId") Long sellerId);
 
-    // --- SALES OVERVIEW QUERY ---
-    // Fixed: Changed 'totalAmount' to 'totalPrice' to match your Order.java file
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM Order o WHERE o.seller.id = :sellerId AND o.status = 'COMPLETED'")
     Double calculateTotalRevenue(@Param("sellerId") Long sellerId);
 
-    // Count total orders
     Long countBySeller_Id(Long sellerId);
 }

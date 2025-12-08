@@ -1,5 +1,6 @@
 package com.foodapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.foodapp.enums.UserRole;
 import jakarta.persistence.*;
 
@@ -14,6 +15,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username; // Acts as Email/Username
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 

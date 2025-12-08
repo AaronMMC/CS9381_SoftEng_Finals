@@ -21,7 +21,7 @@ public class AuthController {
      */
     @PostMapping("/register/customer")
     public User registerCustomer(@RequestBody AuthRequest request) {
-        return userService.registerCustomer(request.username, request.password,request.phoneNumber, request.campus);
+        return userService.registerCustomer(request.username, request.password, request.phoneNumber, request.campus);
     }
 
     /**
@@ -45,14 +45,10 @@ public class AuthController {
      * Endpoint: POST /api/auth/login
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        try {
-            User user = userService.login(request.username, request.password);
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            // Return a 400 Bad Request with message instead of a runtime exception
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Login Failed: " + e.getMessage());
-        }
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) throws Exception {
+        // GlobalExceptionHandler will catch "Invalid password" or "User not found"
+        User user = userService.login(request.username, request.password);
+        return ResponseEntity.ok(user);
     }
 
     // Helper DTOs

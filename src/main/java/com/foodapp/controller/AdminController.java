@@ -52,42 +52,26 @@ public class AdminController {
     // --- ACTIONS ---
 
     @PostMapping("/approve/{sellerId}")
-    public String approveSeller(@PathVariable("sellerId") Long sellerId) {
-        try {
-            userService.approveSeller(sellerId);
-            return "Approved";
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
-        }
+    public Map<String, String> approveSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
+        userService.approveSeller(sellerId);
+        return Map.of("message", "Approved");
     }
 
     @DeleteMapping("/reject/{sellerId}")
-    public String rejectSeller(@PathVariable("sellerId") Long sellerId) {
-        try {
-            userService.rejectSeller(sellerId);
-            return "Rejected";
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
-        }
+    public Map<String, String> rejectSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
+        userService.rejectSeller(sellerId);
+        return Map.of("message", "Rejected");
     }
 
     @PostMapping("/suspend/{sellerId}")
-    public String suspendSeller(@PathVariable("sellerId") Long sellerId) {
-        try {
-            userService.suspendSeller(sellerId);
-            return "Suspended";
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
-        }
+    public Map<String, String> suspendSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
+        userService.suspendSeller(sellerId);
+        return Map.of("message", "Suspended");
     }
 
     @PostMapping("/reactivate/{sellerId}")
-    public String reactivateSeller(@PathVariable("sellerId") Long sellerId) {
-        try {
-            userService.reactivateSeller(sellerId);
-            return "Reactivated";
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
-        }
+    public Map<String, String> reactivateSeller(@PathVariable("sellerId") Long sellerId) throws Exception {
+        userService.reactivateSeller(sellerId);
+        return Map.of("message", "Reactivated");
     }
 }

@@ -1,7 +1,10 @@
+const API_BASE_URL = "http://localhost:8080";
+
 document.addEventListener('DOMContentLoaded', function () {
     const menuList = document.getElementById('menuList');
     const userJson = sessionStorage.getItem('loggedInUser');
 
+    // 1. Check Session
     if (!userJson) {
         window.location.href = '../user/index.html';
         return;
@@ -25,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const sellerId = sellerProfile.id;
 
-    fetch(`/api/menu/seller/${sellerId}`)
+    // 2. Load Menu (FIXED: Added API_BASE_URL)
+    fetch(`${API_BASE_URL}/api/menu/seller/${sellerId}`)
         .then((res) => {
             if (!res.ok) throw new Error('Failed to load menu');
             return res.json();
@@ -33,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then((menu) => renderMenu(menu || []))
         .catch((err) => {
             console.error(err);
-            menuList.innerHTML = '<div class="col-12 text-danger">Failed to load menu.</div>';
+            menuList.innerHTML = '<div class="col-12 text-danger">Failed to load menu. Is the server running?</div>';
         });
 
     function renderMenu(items) {
@@ -48,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ? '<span class="badge bg-success ms-2">Available</span>'
                     : '<span class="badge bg-secondary ms-2">Unavailable</span>';
 
+                // Use placeholder if image is missing
                 const imgUrl = it.imageUrl || '../user/img/Pinakbet.jpg';
 
                 return `
@@ -87,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .join('');
     }
 
-    // Expose handlers
+    // Expose handlers globally so onclick works
     window.onEdit = function (foodId) {
         sessionStorage.setItem('editingFoodId', foodId);
         window.location.href = 'edit-menu.html';
@@ -95,10 +100,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.onDelete = function (foodId) {
         if (!confirm('Delete this item?')) return;
-        fetch(`/api/menu/${foodId}`, { method: 'DELETE' })
+
+        // FIXED: Added API_BASE_URL
+        fetch(`${API_BASE_URL}/api/menu/${foodId}`, { method: 'DELETE' })
             .then((res) => {
                 if (!res.ok) throw new Error('Delete failed');
-                return fetch(`/api/menu/seller/${sellerId}`);
+                // Refresh list using correct URL
+                return fetch(`${API_BASE_URL}/api/menu/seller/${sellerId}`);
             })
             .then((res) => res.json())
             .then((menu) => renderMenu(menu || []))
@@ -106,10 +114,12 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.onToggle = function (foodId) {
-        fetch(`/api/menu/${foodId}/toggle-availability`, { method: 'POST' })
+        // FIXED: Added API_BASE_URL
+        fetch(`${API_BASE_URL}/api/menu/${foodId}/toggle-availability`, { method: 'POST' })
             .then((res) => {
                 if (!res.ok) throw new Error('Toggle failed');
-                return fetch(`/api/menu/seller/${sellerId}`);
+                // Refresh list using correct URL
+                return fetch(`${API_BASE_URL}/api/menu/seller/${sellerId}`);
             })
             .then((res) => res.json())
             .then((menu) => renderMenu(menu || []))

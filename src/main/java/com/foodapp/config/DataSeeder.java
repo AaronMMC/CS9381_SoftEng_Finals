@@ -73,6 +73,7 @@ public class DataSeeder implements CommandLineRunner {
         item1.setName("Sisig with Rice");
         item1.setPrice(95.00);
         item1.setDescription("Spicy pork sisig with egg");
+        item1.setImageUrl("/user/img/Sisig.webp");
         item1.setAvailable(true);
         item1.setSeller(savedProfile);
 
@@ -80,6 +81,7 @@ public class DataSeeder implements CommandLineRunner {
         item2.setName("Fried Chicken");
         item2.setPrice(85.00);
         item2.setDescription("Crispy golden chicken");
+        item2.setImageUrl("/user/img/Chicken.jpg");
         item2.setAvailable(true);
         item2.setSeller(savedProfile);
 
@@ -87,6 +89,7 @@ public class DataSeeder implements CommandLineRunner {
         item3.setName("Sold Out Burger");
         item3.setPrice(120.00);
         item3.setDescription("This item is not available");
+        item3.setImageUrl("/user/img/placeholder.png");
         item3.setAvailable(false);
         item3.setSeller(savedProfile);
 
